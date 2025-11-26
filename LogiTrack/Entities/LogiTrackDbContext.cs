@@ -52,6 +52,14 @@ namespace LogiTrack.Entities
                 .IsRequired()
                 .HasMaxLength(12);
 
+            modelBuilder.Entity<Address>()
+                .Property(r => r.City)
+                .HasMaxLength(50);
+
+            modelBuilder.Entity<Address>()
+                .Property(r => r.Street)
+                .HasMaxLength(50);
+
             modelBuilder.Entity<Company>()
                 .HasOne(c => c.Address)
                 .WithOne(a => a.Company)
