@@ -45,12 +45,12 @@ namespace LogiTrack.Entities
             modelBuilder.Entity<Truck>()
                 .Property(r => r.RegistrationNumber)
                 .IsRequired()
-                .HasMaxLength(7);
+                .HasMaxLength(11);
 
             modelBuilder.Entity<Address>()
                 .Property(r => r.PostalCode)
                 .IsRequired()
-                .HasMaxLength(6);
+                .HasMaxLength(12);
 
             modelBuilder.Entity<Company>()
                 .HasOne(c => c.Address)

@@ -162,6 +162,7 @@ namespace LogiTrack
                     Street = "Nábytek 7",
                     PostalCode = "11000"
                 },
+
                 Driver = c1_driver2,
                 Truck = c1_truck2
             };
@@ -185,6 +186,7 @@ namespace LogiTrack
                     Street = "Voedsel 4",
                     PostalCode = "1012 AB"
                 },
+
                 Driver = c1_driver3,
                 Truck = c1_truck3
             };
@@ -330,6 +332,7 @@ namespace LogiTrack
                     Street = "grön 98",
                     PostalCode = "78900"
                 },
+
                 Driver = c2_driver2,
                 Truck = c2_truck2
             };
