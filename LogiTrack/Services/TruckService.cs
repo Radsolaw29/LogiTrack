@@ -9,11 +9,13 @@ namespace LogiTrack.Services
     {
         private readonly LogiTrackDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly ILogger<TruckService> _logger;
 
-        public TruckService(LogiTrackDbContext dbContext, IMapper mapper)
+        public TruckService(LogiTrackDbContext dbContext, IMapper mapper, ILogger<TruckService> logger)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public TruckDto GetById(int id)
@@ -73,6 +75,8 @@ namespace LogiTrack.Services
 
         public bool DeleteTruck(int id)
         {
+            _logger.LogWarning($"Truck with id: {id} Delete action invoked", id);
+
             var truck = _dbContext
                 .Trucks
                 .FirstOrDefault(x => x.Id == id);
