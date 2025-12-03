@@ -25,6 +25,7 @@ builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IDriverService, DriverService>();
 builder.Services.AddScoped<ITruckService, TruckService>();
 builder.Services.AddScoped<ITransportOrderService, TransportOrderService>();
+builder.Services.AddScoped<LogiTrack.Middleware.ErrorHandlingMiddleware>();
 
 var app = builder.Build();
 
@@ -40,6 +41,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<LogiTrack.Middleware.ErrorHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
