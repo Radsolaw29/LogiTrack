@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LogiTrack.Controllers
 {
     [Route("/api/transportOrder")]
+    [ApiController]
     public class TransportOrderController : ControllerBase
     {
         private readonly ITransportOrderService _transportOrderService;
@@ -27,22 +28,12 @@ namespace LogiTrack.Controllers
         {
             var transportOrder = _transportOrderService.GetTransportOrderById(id);
 
-            if (transportOrder is null)
-            {
-                return NotFound();
-            }
-
             return Ok(transportOrder);
         }
 
         [HttpPost]
         public ActionResult CreateTransportOrder([FromBody] CreateTransportOrderDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var id = _transportOrderService.CreateTransportOrder(dto);
 
             return Created($"/api/transportOrder/{id}", null);
@@ -51,17 +42,7 @@ namespace LogiTrack.Controllers
         [HttpPut("{id}")]
         public ActionResult UpdateTransportOrder([FromBody] UpdateTransportOrder dto, [FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var isUpdated = _transportOrderService.UpdateTransportOrder(id, dto);
-
-            if (!isUpdated)
-            {
-                return NotFound();
-            }
+            _transportOrderService.UpdateTransportOrder(id, dto);
 
             return Ok();
         }
@@ -69,14 +50,9 @@ namespace LogiTrack.Controllers
         [HttpDelete("{id}")]
         public ActionResult DeleteTransportOrder([FromRoute] int id)
         {
-            var isDeleted = _transportOrderService.DeleteTransportOrder(id);
+            _transportOrderService.DeleteTransportOrder(id);
 
-            if (isDeleted)
-            {
-                return NoContent();
-            }
-
-            return NotFound();
+            return NoContent();
         }
     }
 }

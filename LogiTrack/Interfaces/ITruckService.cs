@@ -7,7 +7,7 @@ namespace LogiTrack.Interfaces
         IEnumerable<TruckDto> GetAll();
         TruckDto GetById(int id);
         int CreateTruck(CreateTruckDto dto);
-        bool UpdateTruck(int id, UpdateTruckDto dto);
-        bool DeleteTruck(int id);
+        void UpdateTruck(int id, UpdateTruckDto dto);
+        void DeleteTruck(int id);
     }
 }

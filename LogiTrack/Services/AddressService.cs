@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using LogiTrack.Entities;
+using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
 
@@ -22,7 +23,8 @@ namespace LogiTrack.Services
                .Addresses
                .FirstOrDefault(x => x.Id == id);
 
-            if (address is null) return null;
+            if (address is null) 
+                throw new NotFoundException("Address not found");
 
             var result = _mapper.Map<AddressDto>(address);
 
@@ -50,13 +52,14 @@ namespace LogiTrack.Services
             return address.Id;
         }
 
-        public bool UpdateAddress(int id, UpdateAddressDto dto)
+        public void UpdateAddress(int id, UpdateAddressDto dto)
         {
             var address = _dbContext
                 .Addresses
                 .FirstOrDefault(x => x.Id == id);
 
-            if (address is null) return false;
+            if (address is null)
+                throw new NotFoundException("Address not found");
 
             address.Country = dto.Country;
             address.City = dto.City;
@@ -64,22 +67,19 @@ namespace LogiTrack.Services
             address.PostalCode = dto.PostalCode;
 
             _dbContext.SaveChanges();
-
-            return true;
         }
 
-        public bool DeleteAdderss(int id)
+        public void DeleteAdderss(int id)
         {
             var address = _dbContext
                 .Addresses
                 .FirstOrDefault(x => x.Id == id);
 
-            if(address is null) return false;
+            if(address is null)
+                throw new NotFoundException("Address not found");
 
             _dbContext.Addresses.Remove(address);
             _dbContext.SaveChanges();
-
-            return true;
         }
 
     }

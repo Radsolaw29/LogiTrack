@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LogiTrack.Controllers
 {
     [Route("/api/truck")]
+    [ApiController]
     public class TruckController : ControllerBase
     {
         private readonly ITruckService _truckService;
@@ -27,22 +28,12 @@ namespace LogiTrack.Controllers
         {
             var truck = _truckService.GetById(id);
 
-            if (truck is null)
-            {
-                return NotFound();
-            }
-
             return Ok(truck);
         }
 
         [HttpPost]
         public ActionResult CreateTruck([FromBody] CreateTruckDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var id = _truckService.CreateTruck(dto);
 
             return Created($"/api/truck/{id}", null);
@@ -51,17 +42,7 @@ namespace LogiTrack.Controllers
         [HttpPut("{id}")]
         public ActionResult UpdateTruck([FromBody] UpdateTruckDto dto, [FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var isUpdated = _truckService.UpdateTruck(id, dto);
-
-            if (!isUpdated)
-            {
-                return NotFound();
-            }
+            _truckService.UpdateTruck(id, dto);
 
             return Ok();
         }
@@ -69,15 +50,9 @@ namespace LogiTrack.Controllers
         [HttpDelete("{id}")]
         public ActionResult DeleteTruck([FromRoute] int id)
         {
-            var isDeleted = _truckService.DeleteTruck(id);
+            _truckService.DeleteTruck(id);
 
-            if (isDeleted)
-            {
-                return NoContent();
-            }
-
-            return NotFound();
+            return NoContent();
         }
-
     }
 }

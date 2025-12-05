@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using LogiTrack.Entities;
+using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
 using Microsoft.EntityFrameworkCore;
@@ -42,7 +43,8 @@ namespace LogiTrack.Services
                 .Include(c => c.Trucks)
                 .FirstOrDefault(r => r.Id == id);
 
-            if(company is null) return null;
+            if(company is null) 
+                throw new NotFoundException("Company not found");
 
             var result = _mapper.Map<CompanyDto>(company);
 
@@ -59,13 +61,14 @@ namespace LogiTrack.Services
             return company.Id;
         }
 
-        public bool UpdateCompany(int id, UpdateCompanyDto dto)
+        public void UpdateCompany(int id, UpdateCompanyDto dto)
         {
             var company = _dbContext
                 .Companies
                 .FirstOrDefault(r => r.Id == id);
 
-            if(company is null) return false;
+            if(company is null) 
+                throw new NotFoundException("Company not found");
 
             company.Name = dto.Name;
             company.Description = dto.Description;
@@ -73,22 +76,19 @@ namespace LogiTrack.Services
             company.ContactEmail = dto.ContactEmail;
 
             _dbContext.SaveChanges();
-
-            return true;
         }
 
-        public bool DeleteCompany(int id)
+        public void DeleteCompany(int id)
         {
             var company = _dbContext
                 .Companies
                 .FirstOrDefault(r => r.Id == id);
 
-            if (company is null) return false;
+            if (company is null) 
+                throw new NotFoundException("Company not found");
 
             _dbContext.Companies.Remove(company);
             _dbContext.SaveChanges();
-
-            return true;
         }
 
     }

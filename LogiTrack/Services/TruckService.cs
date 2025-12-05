@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using LogiTrack.Entities;
+using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
 
@@ -24,7 +25,8 @@ namespace LogiTrack.Services
                 .Trucks
                 .FirstOrDefault(x => x.Id == id);
 
-            if(truck is null) return null;
+            if (truck is null)
+                throw new NotFoundException("Truck not found");
 
             var result = _mapper.Map<TruckDto>(truck);
 
@@ -52,13 +54,14 @@ namespace LogiTrack.Services
             return truck.Id;
         }
 
-        public bool UpdateTruck(int id, UpdateTruckDto dto)
+        public void UpdateTruck(int id, UpdateTruckDto dto)
         {
             var truck = _dbContext
                 .Trucks
                 .FirstOrDefault(x => x.Id == id);
 
-            if (truck is null) return false;
+            if (truck is null)
+                throw new NotFoundException("Truck not found");
 
             truck.RegistrationNumber = dto.RegistrationNumber;
             truck.Brand = dto.Brand;
@@ -69,11 +72,9 @@ namespace LogiTrack.Services
             truck.Type = dto.Type;
 
             _dbContext.SaveChanges();
-
-            return true;
         }
 
-        public bool DeleteTruck(int id)
+        public void DeleteTruck(int id)
         {
             _logger.LogWarning($"Truck with id: {id} Delete action invoked", id);
 
@@ -81,12 +82,11 @@ namespace LogiTrack.Services
                 .Trucks
                 .FirstOrDefault(x => x.Id == id);
 
-            if (truck is null) return false;
+            if (truck is null)
+                throw new NotFoundException("Truck not found");
 
             _dbContext.Trucks.Remove(truck);
             _dbContext.SaveChanges();
-
-            return true;
         }
     }
 }

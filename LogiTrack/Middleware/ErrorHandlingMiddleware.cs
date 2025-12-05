@@ -1,4 +1,6 @@
 ﻿
+using LogiTrack.Exceptions;
+
 namespace LogiTrack.Middleware
 {
     public class ErrorHandlingMiddleware : IMiddleware
@@ -16,7 +18,12 @@ namespace LogiTrack.Middleware
             {
                 await next.Invoke(context);
             }
-            catch(Exception ex)
+            catch (NotFoundException notFoundException) 
+            {
+                context.Response.StatusCode = 404;
+                await context.Response.WriteAsync(notFoundException.Message);
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
 

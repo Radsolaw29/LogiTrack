@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using LogiTrack.Entities;
+using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
 
@@ -22,7 +23,8 @@ namespace LogiTrack.Services
                 .Drivers
                 .FirstOrDefault(x => x.Id == id);
 
-            if (driver is null) return null;
+            if (driver is null)
+                throw new NotFoundException("Driver not found");
 
             var result = _mapper.Map<DriverDto>(driver);
 
@@ -50,13 +52,14 @@ namespace LogiTrack.Services
             return driver.Id;
         }
 
-        public bool UpdateDriver(int id, UpdateDriverDto dto)
+        public void UpdateDriver(int id, UpdateDriverDto dto)
         {
             var driver = _dbContext
                 .Drivers
                 .FirstOrDefault(x => x.Id == id);
 
-            if (driver is null) return false;
+            if (driver is null)
+                throw new NotFoundException("Driver not found");
 
             driver.FirstName = dto.FirstName;
             driver.LastName = dto.LastName;
@@ -67,22 +70,19 @@ namespace LogiTrack.Services
             driver.ContactEmail = dto.ContactEmail;
 
             _dbContext.SaveChanges();
-
-            return true;
         }
 
-        public bool DeleteDriver(int id)
+        public void DeleteDriver(int id)
         {
             var driver = _dbContext
                 .Drivers
                 .FirstOrDefault(x => x.Id == id);
 
-            if (driver is null) return false;
+            if (driver is null)
+                throw new NotFoundException("Driver not found");
 
             _dbContext.Drivers.Remove(driver);
             _dbContext.SaveChanges();
-
-            return true;
         }
     }
 }

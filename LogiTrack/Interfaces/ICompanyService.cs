@@ -8,8 +8,8 @@ namespace LogiTrack.Interfaces
         CompanyDto GetById(int id);
         IEnumerable<CompanyDto> GetAll();
         int CreateCompany(CreateCompanyDto dto);
-        bool UpdateCompany(int id, UpdateCompanyDto dto);
-        bool DeleteCompany(int id);
+        void UpdateCompany(int id, UpdateCompanyDto dto);
+        void DeleteCompany(int id);
 
     }
 }

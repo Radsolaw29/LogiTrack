@@ -7,7 +7,7 @@ namespace LogiTrack.Interfaces
         AddressDto GetById(int id);
         IEnumerable<AddressDto> GetAll();
         int CreateAddress(CreateAddressDto dto);
-        bool UpdateAddress(int id, UpdateAddressDto dto);
-        bool DeleteAdderss(int id);
+        void UpdateAddress(int id, UpdateAddressDto dto);
+        void DeleteAdderss(int id);
     }
 }

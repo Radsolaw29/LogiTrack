@@ -1,6 +1,7 @@
 using LogiTrack;
 using LogiTrack.Entities;
 using LogiTrack.Interfaces;
+using LogiTrack.Middleware;
 using LogiTrack.Services;
 using NLog.Web;
 
@@ -25,7 +26,7 @@ builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IDriverService, DriverService>();
 builder.Services.AddScoped<ITruckService, TruckService>();
 builder.Services.AddScoped<ITransportOrderService, TransportOrderService>();
-builder.Services.AddScoped<LogiTrack.Middleware.ErrorHandlingMiddleware>();
+builder.Services.AddScoped<ErrorHandlingMiddleware>();
 
 var app = builder.Build();
 
@@ -42,7 +43,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseMiddleware<LogiTrack.Middleware.ErrorHandlingMiddleware>();
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 

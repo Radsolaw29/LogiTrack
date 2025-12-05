@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LogiTrack.Controllers
 {
     [Route("api/address")]
+    [ApiController]
     public class AddressController : ControllerBase
     {
         private readonly IAddressService _addressService;
@@ -29,22 +30,12 @@ namespace LogiTrack.Controllers
         {
             var address = _addressService.GetById(id);
 
-            if (address is null)
-            {
-                return NotFound();
-            }
-
             return Ok(address);
         }
 
         [HttpPost]
         public ActionResult CreateAddress([FromBody] CreateAddressDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var id = _addressService.CreateAddress(dto);
 
             return Created($"/api/address/{id}", null);
@@ -53,17 +44,7 @@ namespace LogiTrack.Controllers
         [HttpPut("{id}")]
         public ActionResult UpdateAddress([FromBody]UpdateAddressDto dto, [FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var isUpdated = _addressService.UpdateAddress(id, dto);
-
-            if (!isUpdated)
-            {
-                return NotFound();
-            }
+            _addressService.UpdateAddress(id, dto);
 
             return Ok();
         }
@@ -71,14 +52,9 @@ namespace LogiTrack.Controllers
         [HttpDelete("{id}")]
         public ActionResult DeleteAddress([FromRoute] int id)
         {
-            var isDeleted = _addressService.DeleteAdderss(id);
+            _addressService.DeleteAdderss(id);
 
-            if (isDeleted)
-            {
-                return NoContent();
-            }
-
-            return NotFound();
+            return NoContent();
         }
     }
 }

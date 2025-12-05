@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LogiTrack.Controllers
 {
     [Route("/api/driver")]
+    [ApiController]
     public class DriverController : ControllerBase
     {
         private readonly IDriverService _driverService;
@@ -26,23 +27,13 @@ namespace LogiTrack.Controllers
         public ActionResult<DriverDto> GetDriverById([FromRoute] int id)
         {
             var driver = _driverService.GetById(id);
-
-            if(driver is null)
-            {
-                return NotFound();
-            }
-
+            
             return Ok(driver);
         }
 
         [HttpPost]
         public ActionResult CreateDriver([FromBody] CreateDriverDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var id = _driverService.CreateDriver(dto);
 
             return Created($"/api/driver/{id}", null);
@@ -51,17 +42,7 @@ namespace LogiTrack.Controllers
         [HttpPut("{id}")]
         public ActionResult UpdateDriver([FromBody] UpdateDriverDto dto, [FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var isUpdated = _driverService.UpdateDriver(id, dto);
-
-            if (!isUpdated)
-            {
-                return NotFound();
-            }
+            _driverService.UpdateDriver(id, dto);
 
             return Ok();
         }
@@ -69,14 +50,9 @@ namespace LogiTrack.Controllers
         [HttpDelete("{id}")]
         public ActionResult DeleteDriver([FromRoute] int id)
         {
-            var isDeleted = _driverService.DeleteDriver(id);
+            _driverService.DeleteDriver(id);
 
-            if (isDeleted)
-            {
-                return NoContent();
-            }
-
-            return NotFound();
+            return NoContent();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using LogiTrack.Entities;
+using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +35,8 @@ namespace LogiTrack.Services
                 .Orders
                 .FirstOrDefault(x => x.Id == id);
 
-            if(transportOrder is null) return null;
+            if(transportOrder is null)
+                throw new NotFoundException("Transport order not found");
 
             var result = _mapper.Map<TransportOrderDto>(transportOrder);
 
@@ -51,13 +53,14 @@ namespace LogiTrack.Services
             return transportOrder.Id;
         }
 
-        public bool UpdateTransportOrder(int id, UpdateTransportOrder dto)
+        public void UpdateTransportOrder(int id, UpdateTransportOrder dto)
         {
             var transportOrder = _dbContext
                 .Orders
                 .FirstOrDefault(x => x.Id == id);
 
-            if (transportOrder is null) return false;
+            if (transportOrder is null)
+                throw new NotFoundException("Transport order not found");
 
             transportOrder.OrderName = dto.OrderName;
             transportOrder.Description = dto.Description;
@@ -69,22 +72,19 @@ namespace LogiTrack.Services
             transportOrder.TruckId = dto.TruckId;
 
             _dbContext.SaveChanges();
-
-            return true;
         }
 
-        public bool DeleteTransportOrder(int id)
+        public void DeleteTransportOrder(int id)
         {
             var transportOrder = _dbContext
                 .Orders
                 .FirstOrDefault(x => x.Id == id);
 
-            if (transportOrder is null) return false;
+            if (transportOrder is null)
+                throw new NotFoundException("Transport order not found");
 
             _dbContext.Orders.Remove(transportOrder);
             _dbContext.SaveChanges();
-
-            return true;
         }
     }
 }

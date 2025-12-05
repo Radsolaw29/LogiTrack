@@ -7,7 +7,7 @@ namespace LogiTrack.Interfaces
         DriverDto GetById(int id);
         IEnumerable<DriverDto> GetAll();
         int CreateDriver(CreateDriverDto dto);
-        bool UpdateDriver(int id, UpdateDriverDto dto);
-        bool DeleteDriver(int id);
+        void UpdateDriver(int id, UpdateDriverDto dto);
+        void DeleteDriver(int id);
     }
 }
