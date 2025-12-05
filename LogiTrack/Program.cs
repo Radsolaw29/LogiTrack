@@ -27,6 +27,7 @@ builder.Services.AddScoped<IDriverService, DriverService>();
 builder.Services.AddScoped<ITruckService, TruckService>();
 builder.Services.AddScoped<ITransportOrderService, TransportOrderService>();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
+builder.Services.AddScoped<RequestTimeMiddleware>();
 
 var app = builder.Build();
 
@@ -44,6 +45,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseMiddleware<RequestTimeMiddleware>();
 
 app.UseHttpsRedirection();
 
