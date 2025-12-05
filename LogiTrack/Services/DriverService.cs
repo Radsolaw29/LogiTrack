@@ -10,11 +10,13 @@ namespace LogiTrack.Services
     {
         private readonly LogiTrackDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly ILogger<DriverService> _logger;
 
-        public DriverService(LogiTrackDbContext dbContext, IMapper mapper)
+        public DriverService(LogiTrackDbContext dbContext, IMapper mapper, ILogger<DriverService> logger)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public DriverDto GetById(int id)
@@ -74,6 +76,8 @@ namespace LogiTrack.Services
 
         public void DeleteDriver(int id)
         {
+            _logger.LogWarning($"Driver with id: {id}, Delete action invoked", id);
+
             var driver = _dbContext
                 .Drivers
                 .FirstOrDefault(x => x.Id == id);
