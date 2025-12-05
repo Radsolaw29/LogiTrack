@@ -10,11 +10,13 @@ namespace LogiTrack.Services
     {
         private readonly LogiTrackDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly ILogger<AddressService> _logger;
 
-        public AddressService(LogiTrackDbContext dbContext, IMapper mapper)
+        public AddressService(LogiTrackDbContext dbContext, IMapper mapper, ILogger<AddressService> logger)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public AddressDto GetById(int id)
@@ -71,6 +73,8 @@ namespace LogiTrack.Services
 
         public void DeleteAdderss(int id)
         {
+            _logger.LogWarning($"Address with id: {id} Delete action invoked", id);
+
             var address = _dbContext
                 .Addresses
                 .FirstOrDefault(x => x.Id == id);

@@ -11,11 +11,13 @@ namespace LogiTrack.Services
     {
         private readonly LogiTrackDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly ILogger<TransportOrderService> _logger;
 
-        public TransportOrderService(LogiTrackDbContext dbContext, IMapper mapper)
+        public TransportOrderService(LogiTrackDbContext dbContext, IMapper mapper, ILogger<TransportOrderService> logger)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public IEnumerable<TransportOrderDto> GetAllTransportOrders()
@@ -76,6 +78,8 @@ namespace LogiTrack.Services
 
         public void DeleteTransportOrder(int id)
         {
+            _logger.LogWarning($"Transport order with id: {id} Delete action invoked", id);
+
             var transportOrder = _dbContext
                 .Orders
                 .FirstOrDefault(x => x.Id == id);

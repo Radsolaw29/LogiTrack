@@ -11,11 +11,13 @@ namespace LogiTrack.Services
     {
         private readonly LogiTrackDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly ILogger<CompanyService> _logger;
 
-        public CompanyService(LogiTrackDbContext dbContext, IMapper mapper)
+        public CompanyService(LogiTrackDbContext dbContext, IMapper mapper, ILogger<CompanyService> logger)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public IEnumerable<CompanyDto> GetAll() 
@@ -80,6 +82,8 @@ namespace LogiTrack.Services
 
         public void DeleteCompany(int id)
         {
+            _logger.LogWarning($"Company with id: {id} Delete action invoked", id);
+
             var company = _dbContext
                 .Companies
                 .FirstOrDefault(r => r.Id == id);
