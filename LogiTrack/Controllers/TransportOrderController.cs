@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LogiTrack.Controllers
 {
-    [Route("/api/transportOrder")]
+    [Route("/api/company/{companyId}/transportOrder")]
     [ApiController]
     public class TransportOrderController : ControllerBase
     {
@@ -16,41 +16,49 @@ namespace LogiTrack.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<TransportOrderDto>> GetAllTransportOrder()
+        public ActionResult<IEnumerable<TransportOrderDto>> GetAllTransportOrder([FromRoute] int companyId)
         {
-            var transportOrders = _transportOrderService.GetAllTransportOrders();
+            var transportOrders = _transportOrderService.GetAllTransportOrders(companyId);
 
             return Ok(transportOrders);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<TransportOrderDto> GetTransportOrderById([FromRoute] int id)
+        public ActionResult<TransportOrderDto> GetTransportOrderById([FromRoute] int companyId, [FromRoute] int id)
         {
-            var transportOrder = _transportOrderService.GetTransportOrderById(id);
+            TransportOrderDto transportOrder = _transportOrderService.GetTransportOrderById(companyId, id);
 
             return Ok(transportOrder);
         }
 
         [HttpPost]
-        public ActionResult CreateTransportOrder([FromBody] CreateTransportOrderDto dto)
+        public ActionResult CreateTransportOrder([FromRoute] int companyId ,[FromBody] CreateTransportOrderDto dto)
         {
-            var id = _transportOrderService.CreateTransportOrder(dto);
+            var id = _transportOrderService.CreateTransportOrder(companyId ,dto);
 
-            return Created($"/api/transportOrder/{id}", null);
+            return Created($"/api/company/{companyId}/transportOrder/{id}", null);
         }
 
         [HttpPut("{id}")]
-        public ActionResult UpdateTransportOrder([FromBody] UpdateTransportOrder dto, [FromRoute] int id)
+        public ActionResult UpdateTransportOrder([FromRoute] int companyId, [FromBody] UpdateTransportOrder dto, [FromRoute] int id)
         {
-            _transportOrderService.UpdateTransportOrder(id, dto);
+            _transportOrderService.UpdateTransportOrder(companyId ,id, dto);
 
             return Ok();
         }
 
         [HttpDelete("{id}")]
-        public ActionResult DeleteTransportOrder([FromRoute] int id)
+        public ActionResult DeleteTransportOrder([FromRoute] int companyId, [FromRoute] int id)
         {
-            _transportOrderService.DeleteTransportOrder(id);
+            _transportOrderService.DeleteTransportOrder(companyId, id);
+
+            return NoContent();
+        }
+
+        [HttpDelete]
+        public ActionResult DeleteAllTransportOrders([FromRoute] int companyId)
+        {
+            _transportOrderService.DeleteAllTraansportOrders(companyId);
 
             return NoContent();
         }

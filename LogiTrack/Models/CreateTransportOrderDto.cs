@@ -10,8 +10,8 @@ namespace LogiTrack.Models
         public string Description { get; set; } = string.Empty;
         public int Price { get; set; }
 
-        [Required]
-        public int CompanyId { get; set; }
+        //[Required]
+        ////public int CompanyId { get; set; }
         [Required]
         public int PickupAddressId { get; set; }
         [Required]

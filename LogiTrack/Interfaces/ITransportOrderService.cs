@@ -4,10 +4,11 @@ namespace LogiTrack.Interfaces
 {
     public interface ITransportOrderService
     {
-        TransportOrderDto GetTransportOrderById(int id);
-        IEnumerable<TransportOrderDto> GetAllTransportOrders();
-        int CreateTransportOrder(CreateTransportOrderDto dto);
-        void UpdateTransportOrder(int id, UpdateTransportOrder dto);
-        void DeleteTransportOrder(int id);
+        TransportOrderDto GetTransportOrderById(int companyId, int id);
+        IEnumerable<TransportOrderDto> GetAllTransportOrders(int companyId);
+        int CreateTransportOrder(int companyId, CreateTransportOrderDto dto);
+        void UpdateTransportOrder(int companyId, int id, UpdateTransportOrder dto);
+        void DeleteTransportOrder(int companyId, int id);
+        void DeleteAllTraansportOrders(int companyId);
     }
 }
