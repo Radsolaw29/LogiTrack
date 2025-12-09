@@ -3,6 +3,7 @@ using LogiTrack.Entities;
 using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace LogiTrack.Services
 {
@@ -19,13 +20,15 @@ namespace LogiTrack.Services
             _logger = logger;
         }
 
-        public TruckDto GetById(int id)
+        public TruckDto GetById(int companyId, int id)
         {
+            var company = GetCompanyById(companyId);
+
             var truck = _dbContext
                 .Trucks
                 .FirstOrDefault(x => x.Id == id);
 
-            if (truck is null)
+            if (truck is null || truck.CompanyId != companyId)
                 throw new NotFoundException("Truck not found");
 
             var result = _mapper.Map<TruckDto>(truck);
@@ -33,20 +36,22 @@ namespace LogiTrack.Services
             return result;
         }
 
-        public IEnumerable<TruckDto> GetAll()
+        public IEnumerable<TruckDto> GetAll(int companyId)
         {
-            var tracks = _dbContext
-                .Trucks
-                .ToList();
+            var company = GetCompanyById(companyId);
 
-            var tracksDtos = _mapper.Map<List<TruckDto>>(tracks);
+            var tracksDtos = _mapper.Map<List<TruckDto>>(company.Trucks);
 
             return tracksDtos;
         }
 
-        public int CreateTruck(CreateTruckDto dto)
+        public int CreateTruck(int companyId, CreateTruckDto dto)
         {
+            var company = GetCompanyById(companyId);
+
             var truck = _mapper.Map<Truck>(dto);
+
+            truck.CompanyId = companyId;
 
             _dbContext.Trucks.Add(truck);
             _dbContext.SaveChanges();
@@ -54,11 +59,13 @@ namespace LogiTrack.Services
             return truck.Id;
         }
 
-        public void UpdateTruck(int id, UpdateTruckDto dto)
+        public void UpdateTruck(int companyId, int id, UpdateTruckDto dto)
         {
+            var company = GetCompanyById(companyId);
+
             var truck = _dbContext
                 .Trucks
-                .FirstOrDefault(x => x.Id == id);
+                .FirstOrDefault(x => x.Id == id && x.CompanyId == companyId);
 
             if (truck is null)
                 throw new NotFoundException("Truck not found");
@@ -74,19 +81,42 @@ namespace LogiTrack.Services
             _dbContext.SaveChanges();
         }
 
-        public void DeleteTruck(int id)
+        public void DeleteTruck(int companyId, int id)
         {
             _logger.LogWarning($"Truck with id: {id} Delete action invoked", id);
 
+            var company = GetCompanyById(companyId);
+
             var truck = _dbContext
                 .Trucks
-                .FirstOrDefault(x => x.Id == id);
+                .FirstOrDefault(x => x.Id == id && x.CompanyId == companyId);
 
             if (truck is null)
                 throw new NotFoundException("Truck not found");
 
             _dbContext.Trucks.Remove(truck);
             _dbContext.SaveChanges();
+        }
+
+        public void DeleteAllTrucks(int companyId)
+        {
+            var company = GetCompanyById(companyId);
+
+            _dbContext.Trucks.RemoveRange(company.Trucks);
+            _dbContext.SaveChanges();
+        }
+
+        private Company GetCompanyById(int companyId)
+        {
+            var company = _dbContext
+                .Companies
+                .Include(x => x.Trucks)
+                .FirstOrDefault(x => x.Id == companyId);
+
+            if (company is null)
+                throw new NotFoundException("Company not found");
+
+            return company;
         }
     }
 }

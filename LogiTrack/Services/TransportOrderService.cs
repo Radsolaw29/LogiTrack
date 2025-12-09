@@ -119,5 +119,6 @@ namespace LogiTrack.Services
 
             return company;
         }
+
     }
 }

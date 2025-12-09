@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LogiTrack.Controllers
 {
-    [Route("/api/truck")]
+    [Route("/api/company/{companyId}/truck")]
     [ApiController]
     public class TruckController : ControllerBase
     {
@@ -16,41 +16,49 @@ namespace LogiTrack.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<TruckDto>> GetAllTrucks()
+        public ActionResult<IEnumerable<TruckDto>> GetAllTrucks([FromRoute] int companyId)
         {
-            var trucksDtos = _truckService.GetAll();
+            var trucksDtos = _truckService.GetAll(companyId);
 
             return Ok(trucksDtos);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<TruckDto> GetTruckById([FromRoute] int id)
+        public ActionResult<TruckDto> GetTruckById([FromRoute] int companyId, [FromRoute] int id)
         {
-            var truck = _truckService.GetById(id);
+            var truck = _truckService.GetById(companyId, id);
 
             return Ok(truck);
         }
 
         [HttpPost]
-        public ActionResult CreateTruck([FromBody] CreateTruckDto dto)
+        public ActionResult CreateTruck([FromRoute] int companyId, [FromBody] CreateTruckDto dto)
         {
-            var id = _truckService.CreateTruck(dto);
+            var id = _truckService.CreateTruck(companyId, dto);
 
-            return Created($"/api/truck/{id}", null);
+            return Created($"/api/company/{companyId}/truck/{id}", null);
         }
 
         [HttpPut("{id}")]
-        public ActionResult UpdateTruck([FromBody] UpdateTruckDto dto, [FromRoute] int id)
+        public ActionResult UpdateTruck([FromRoute] int companyId, [FromBody] UpdateTruckDto dto, [FromRoute] int id)
         {
-            _truckService.UpdateTruck(id, dto);
+            _truckService.UpdateTruck(companyId, id, dto);
 
             return Ok();
         }
 
         [HttpDelete("{id}")]
-        public ActionResult DeleteTruck([FromRoute] int id)
+        public ActionResult DeleteTruck([FromRoute] int companyId, [FromRoute] int id)
         {
-            _truckService.DeleteTruck(id);
+            _truckService.DeleteTruck(companyId, id);
+
+            return NoContent();
+        }
+
+        [HttpDelete]
+        public ActionResult DeleteAllTrucks([FromRoute] int companyId)
+        {
+            _truckService.DeleteAllTrucks(companyId);
 
             return NoContent();
         }

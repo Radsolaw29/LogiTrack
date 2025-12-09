@@ -59,11 +59,13 @@ namespace LogiTrack.Services
             return driver.Id;
         }
 
-        public void UpdateDriver(int id, UpdateDriverDto dto)
+        public void UpdateDriver(int companyId, int id, UpdateDriverDto dto)
         {
+            var company = GetCompanyById(companyId);
+
             var driver = _dbContext
                 .Drivers
-                .FirstOrDefault(x => x.Id == id);
+                .FirstOrDefault(x => x.Id == id && x.CompanyId == companyId);
 
             if (driver is null)
                 throw new NotFoundException("Driver not found");
@@ -79,13 +81,15 @@ namespace LogiTrack.Services
             _dbContext.SaveChanges();
         }
 
-        public void DeleteDriver(int id)
+        public void DeleteDriver(int companyId, int id)
         {
             _logger.LogWarning($"Driver with id: {id}, Delete action invoked", id);
 
+            var company = GetCompanyById(companyId);
+
             var driver = _dbContext
                 .Drivers
-                .FirstOrDefault(x => x.Id == id);
+                .FirstOrDefault(x => x.Id == id && x.CompanyId == companyId);
 
             if (driver is null)
                 throw new NotFoundException("Driver not found");
