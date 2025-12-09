@@ -3,6 +3,7 @@ using LogiTrack.Entities;
 using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace LogiTrack.Services
 {
@@ -19,13 +20,15 @@ namespace LogiTrack.Services
             _logger = logger;
         }
 
-        public DriverDto GetById(int id)
+        public DriverDto GetById(int companyId, int id)
         {
+            var company = GetCompanyById(companyId);
+
             var driver = _dbContext
                 .Drivers
                 .FirstOrDefault(x => x.Id == id);
 
-            if (driver is null)
+            if (driver is null || driver.CompanyId != companyId)
                 throw new NotFoundException("Driver not found");
 
             var result = _mapper.Map<DriverDto>(driver);
@@ -33,20 +36,22 @@ namespace LogiTrack.Services
             return result;
         }
 
-        public IEnumerable<DriverDto> GetAll()
+        public IEnumerable<DriverDto> GetAll(int companyId)
         {
-            var drivers = _dbContext
-                .Drivers
-                .ToList();
+            var company = GetCompanyById(companyId);
 
-            var driversDtos = _mapper.Map<List<DriverDto>>(drivers);
+            var driversDtos = _mapper.Map<List<DriverDto>>(company.Drivers);
 
             return driversDtos;
         }
 
-        public int CreateDriver(CreateDriverDto dto)
+        public int CreateDriver(int companyId, CreateDriverDto dto)
         {
+            var company = GetCompanyById(companyId);
+
             var driver = _mapper.Map<Driver>(dto);
+
+            driver.CompanyId = companyId;
 
             _dbContext.Drivers.Add(driver);
             _dbContext.SaveChanges();
@@ -87,6 +92,27 @@ namespace LogiTrack.Services
 
             _dbContext.Drivers.Remove(driver);
             _dbContext.SaveChanges();
+        }
+
+        public void DeleteAllDrivers(int companyId)
+        {
+            var company = GetCompanyById(companyId);
+
+            _dbContext.Drivers.RemoveRange(company.Drivers);
+            _dbContext.SaveChanges();
+        }
+
+        private Company GetCompanyById(int companyId)
+        {
+            var company = _dbContext
+                .Companies
+                .Include(x => x.Drivers)
+                .FirstOrDefault(x => x.Id == companyId);
+
+            if(company is null)
+                throw new NotFoundException("Company not found");
+
+            return company;
         }
     }
 }

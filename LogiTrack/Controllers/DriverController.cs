@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LogiTrack.Controllers
 {
-    [Route("/api/driver")]
+    [Route("/api/company/{companyId}/driver")]
     [ApiController]
     public class DriverController : ControllerBase
     {
@@ -16,41 +16,49 @@ namespace LogiTrack.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<DriverDto>> GetAllDrivers()
+        public ActionResult<IEnumerable<DriverDto>> GetAllDrivers([FromRoute] int companyId)
         {
-            var driversDtos = _driverService.GetAll();
+            var driversDtos = _driverService.GetAll(companyId);
 
             return Ok(driversDtos);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<DriverDto> GetDriverById([FromRoute] int id)
+        public ActionResult<DriverDto> GetDriverById([FromRoute] int companyId, [FromRoute] int id)
         {
-            var driver = _driverService.GetById(id);
+            DriverDto driver = _driverService.GetById(companyId, id);
             
             return Ok(driver);
         }
 
         [HttpPost]
-        public ActionResult CreateDriver([FromBody] CreateDriverDto dto)
+        public ActionResult CreateDriver([FromRoute] int companyId ,[FromBody] CreateDriverDto dto)
         {
-            var id = _driverService.CreateDriver(dto);
+            var id = _driverService.CreateDriver(companyId, dto);
 
-            return Created($"/api/driver/{id}", null);
+            return Created($"/api/company/{companyId}/driver/{id}", null);
         }
 
         [HttpPut("{id}")]
-        public ActionResult UpdateDriver([FromBody] UpdateDriverDto dto, [FromRoute] int id)
+        public ActionResult UpdateDriver([FromRoute] int companyId, [FromBody] UpdateDriverDto dto, [FromRoute] int id)
         {
-            _driverService.UpdateDriver(id, dto);
+            _driverService.UpdateDriver(companyId, id, dto);
 
             return Ok();
         }
 
         [HttpDelete("{id}")]
-        public ActionResult DeleteDriver([FromRoute] int id)
+        public ActionResult DeleteDriver([FromRoute] int companyId, [FromRoute] int id)
         {
-            _driverService.DeleteDriver(id);
+            _driverService.DeleteDriver(companyId, id);
+
+            return NoContent();
+        }
+
+        [HttpDelete]
+        public ActionResult DeleteAllDrivers([FromRoute] int companyId)
+        {
+            _driverService.DeleteAllDrivers(companyId);
 
             return NoContent();
         }
