@@ -3,6 +3,7 @@ using LogiTrack.Entities;
 using LogiTrack.Interfaces;
 using LogiTrack.Middleware;
 using LogiTrack.Services;
+using Microsoft.AspNetCore.Identity;
 using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +29,8 @@ builder.Services.AddScoped<ITruckService, TruckService>();
 builder.Services.AddScoped<ITransportOrderService, TransportOrderService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+
 builder.Services.AddScoped<RequestTimeMiddleware>();
 
 var app = builder.Build();
