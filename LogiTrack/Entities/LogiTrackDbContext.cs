@@ -10,6 +10,8 @@ namespace LogiTrack.Entities
         public DbSet<Truck> Trucks { get; set; }
         public DbSet<TransportOrder> Orders { get; set; }
         public DbSet<Driver> Drivers { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -59,6 +61,14 @@ namespace LogiTrack.Entities
             modelBuilder.Entity<Address>()
                 .Property(r => r.Street)
                 .HasMaxLength(50);
+
+            modelBuilder.Entity<User>()
+                .Property(r => r.Email)
+                .IsRequired();
+
+            modelBuilder.Entity<Role>()
+                .Property(r => r.Name)
+                .IsRequired();
 
             modelBuilder.Entity<Company>()
                 .HasOne(c => c.Address)
