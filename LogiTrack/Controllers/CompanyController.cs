@@ -2,6 +2,7 @@
 using LogiTrack.Entities;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +19,7 @@ namespace LogiTrack.Controllers
             _companyService = companyService;
         }
 
+        [Authorize]
         [HttpGet]
         public ActionResult<IEnumerable<CompanyDto>> GetAllCompanies()
         {

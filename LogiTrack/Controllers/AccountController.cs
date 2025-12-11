@@ -23,5 +23,13 @@ namespace LogiTrack.Controllers
             return Ok();
         }
 
+        [HttpPost("login")]
+        public ActionResult LoginUser([FromBody] LoginDto dto)
+        {
+            var token = _accountService.GenerateJwt(dto);
+
+            return Ok(token);
+        }
+
     }
 }
