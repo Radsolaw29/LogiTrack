@@ -1,4 +1,5 @@
 ﻿using LogiTrack.Models;
+using System.Security.Claims;
 
 namespace LogiTrack.Interfaces
 {

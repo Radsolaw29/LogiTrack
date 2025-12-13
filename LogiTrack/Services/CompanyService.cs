@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
+using LogiTrack.Authorization;
 using LogiTrack.Entities;
 using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace LogiTrack.Services
 {
@@ -12,12 +15,17 @@ namespace LogiTrack.Services
         private readonly LogiTrackDbContext _dbContext;
         private readonly IMapper _mapper;
         private readonly ILogger<CompanyService> _logger;
+        private readonly IAuthorizationService _authorizationService;
+        private readonly IUserContextService _userContextService;
 
-        public CompanyService(LogiTrackDbContext dbContext, IMapper mapper, ILogger<CompanyService> logger)
+        public CompanyService(LogiTrackDbContext dbContext, IMapper mapper, ILogger<CompanyService> logger, 
+            IAuthorizationService authorizationService, IUserContextService userContextService)
         {
             _dbContext = dbContext;
             _mapper = mapper;
             _logger = logger;
+            _authorizationService = authorizationService;
+            _userContextService = userContextService;
         }
 
         public IEnumerable<CompanyDto> GetAll() 
@@ -57,6 +65,7 @@ namespace LogiTrack.Services
         {
             var company = _mapper.Map<Company>(dto);
 
+            company.CreatedById = _userContextService.GetUserId;
             _dbContext.Companies.Add(company);
             _dbContext.SaveChanges();
 
@@ -71,6 +80,11 @@ namespace LogiTrack.Services
 
             if(company is null) 
                 throw new NotFoundException("Company not found");
+
+            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User, company, new ResourcerceOperationRequirement(ResourceOperation.Update)).Result;
+
+            if (!authorizationResult.Succeeded)
+                throw new ForbidException("You do not have permission to access this resource.");
 
             company.Name = dto.Name;
             company.Description = dto.Description;
@@ -90,6 +104,11 @@ namespace LogiTrack.Services
 
             if (company is null) 
                 throw new NotFoundException("Company not found");
+
+            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User, company, new ResourcerceOperationRequirement(ResourceOperation.Delete)).Result;
+
+            if (!authorizationResult.Succeeded)
+                throw new ForbidException("You do not have permission to access this resource.");
 
             _dbContext.Companies.Remove(company);
             _dbContext.SaveChanges();

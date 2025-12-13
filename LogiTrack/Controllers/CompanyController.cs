@@ -5,11 +5,13 @@ using LogiTrack.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace LogiTrack.Controllers
 {
     [Route("api/company")]
     [ApiController]
+    [Authorize]
     public class CompanyController : ControllerBase
     {
         private readonly ICompanyService _companyService;
@@ -18,9 +20,9 @@ namespace LogiTrack.Controllers
         {
             _companyService = companyService;
         }
-
-        [Authorize]
+        
         [HttpGet]
+        [Authorize(Roles ="Admin,Manager")]
         public ActionResult<IEnumerable<CompanyDto>> GetAllCompanies()
         {
             var companiesDtos = _companyService.GetAll();
@@ -29,6 +31,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public ActionResult<CompanyDto> GetCompany([FromRoute] int id)
         {
             var company = _companyService.GetById(id);
@@ -37,14 +40,16 @@ namespace LogiTrack.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles ="Admin")]
         public ActionResult CreateCompany([FromBody] CreateCompanyDto dto)
-        {
+        { 
             var id = _companyService.CreateCompany(dto);
 
             return Created($"/api/company/{id}", null);
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles ="Admin,Manager")]
         public ActionResult UpdateCompany([FromBody] UpdateCompanyDto dto, [FromRoute] int id)
         {
             _companyService.UpdateCompany(id, dto);
@@ -53,6 +58,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public ActionResult DeleteCompany([FromRoute] int id)
         {
             _companyService.DeleteCompany(id);
