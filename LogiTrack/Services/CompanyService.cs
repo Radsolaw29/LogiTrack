@@ -28,19 +28,30 @@ namespace LogiTrack.Services
             _userContextService = userContextService;
         }
 
-        public IEnumerable<CompanyDto> GetAll() 
+        public PageResult<CompanyDto> GetAll(CompanyQuery query) 
         {
-            var companies = _dbContext
+            var baseQuery = _dbContext
                 .Companies
                 .Include(c => c.Address)
                 .Include(c => c.TransportOrders)
                 .Include(c => c.Drivers)
                 .Include(c => c.Trucks)
+                .Where(r => query.SearchPhrase == null
+                || (r.Name.ToLower().Contains(query.SearchPhrase.ToLower())
+                || r.Description.ToLower().Contains(query.SearchPhrase.ToLower())));
+
+            var companies = baseQuery
+                .Skip(query.PageSize * (query.PageNumber - 1))
+                .Take(query.PageSize)
                 .ToList();
+
+            var totalItemsCount = baseQuery.Count();
 
             var companiesDtos = _mapper.Map<List<CompanyDto>>(companies);
 
-            return companiesDtos;
+            var result = new PageResult<CompanyDto>(companiesDtos, totalItemsCount, query.PageSize, query.PageNumber);
+
+            return result;
         }
 
         public CompanyDto GetById(int id)

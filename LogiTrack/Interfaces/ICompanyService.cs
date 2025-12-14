@@ -7,7 +7,7 @@ namespace LogiTrack.Interfaces
     {
 
         CompanyDto GetById(int id);
-        IEnumerable<CompanyDto> GetAll();
+        PageResult<CompanyDto> GetAll(CompanyQuery query);
         int CreateCompany(CreateCompanyDto dto);
         void UpdateCompany(int id, UpdateCompanyDto dto);
         void DeleteCompany(int id);
