@@ -6,6 +6,7 @@ using LogiTrack.Interfaces;
 using LogiTrack.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using System.Security.Claims;
 
 namespace LogiTrack.Services
@@ -39,6 +40,21 @@ namespace LogiTrack.Services
                 .Where(r => query.SearchPhrase == null
                 || (r.Name.ToLower().Contains(query.SearchPhrase.ToLower())
                 || r.Description.ToLower().Contains(query.SearchPhrase.ToLower())));
+
+            if (!string.IsNullOrEmpty(query.SortBy))
+            {
+                var columnsSelectors = new Dictionary<string, Expression<Func<Company, object>>>
+                {
+                    { nameof(Company.Name), r => r.Name },
+                    { nameof(Company.Description), r => r.Description },
+                    { nameof(Company.ContactEmail), r => r.ContactEmail }
+                };
+
+                var selectedColumn = columnsSelectors[query.SortBy];
+
+                baseQuery = query.SortDirection == SortDirection.ASC? baseQuery.OrderBy(selectedColumn)
+                    : baseQuery.OrderByDescending(selectedColumn);
+            }
 
             var companies = baseQuery
                 .Skip(query.PageSize * (query.PageNumber - 1))

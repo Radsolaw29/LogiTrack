@@ -1,10 +1,12 @@
 ﻿using FluentValidation;
+using LogiTrack.Entities;
 
 namespace LogiTrack.Models.Validators
 {
     public class CompanyQueryValidator : AbstractValidator<CompanyQuery>
     {
         private int [] allowedPageSizes = new[] {5, 10, 20, 50};
+        private string[] allowedSortByColumnNames = { nameof(Company.Name), nameof(Company.Description), nameof(Company.ContactEmail) };
 
         public CompanyQueryValidator()
         {
@@ -17,6 +19,9 @@ namespace LogiTrack.Models.Validators
                     context.AddFailure("PageSize", $"PageSize must in [{string.Join(",", allowedPageSizes)}]");
                 }
             });
+
+            RuleFor(x => x.SortBy).Must(value => string.IsNullOrEmpty(value) || allowedSortByColumnNames.Contains(value))
+                .WithMessage($"Sort by is optional, or must be in [{string.Join(",", allowedSortByColumnNames)}]");
         }
     }
 }
