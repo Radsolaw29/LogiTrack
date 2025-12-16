@@ -3,6 +3,8 @@ using LogiTrack.Entities;
 using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
+using Microsoft.IdentityModel.Tokens;
+using System.Linq.Expressions;
 
 namespace LogiTrack.Services
 {
@@ -33,15 +35,44 @@ namespace LogiTrack.Services
             return result;
         }
 
-        public IEnumerable<AddressDto> GetAll()
+        public PageResult<AddressDto> GetAll(AddressQuery query)
         {
-            var addresses = _dbContext
+            var baseQuery = _dbContext
                 .Addresses
+                .Where(x => query.SearchPhrase == null ||
+                (x.Country.ToLower().Contains(query.SearchPhrase.ToLower())
+                || x.City.ToLower().Contains(query.SearchPhrase.ToLower())
+                || x.Street.ToLower().Contains(query.SearchPhrase.ToLower())));
+
+            if (!string.IsNullOrEmpty(query.SortBy))
+            {
+                var columnsSelectors = new Dictionary<string, Expression<Func<Address, object>>>
+                {
+                    { nameof(Address.Country), r => r.Country },
+                    { nameof(Address.City), r => r.City },
+                    { nameof(Address.Street) , r => r.Street } 
+                };
+
+                var selectedColumn = columnsSelectors[query.SortBy];
+
+                baseQuery = query.SortDirection == SortDirection.ASC 
+                    ? baseQuery.OrderBy(selectedColumn)
+                    : baseQuery.OrderByDescending(selectedColumn);
+            }
+
+
+            var addresses = baseQuery.Skip(query.PageSize * (query.PageNumber - 1))
+                .Take(query.PageSize)
                 .ToList();
+
+            var totalItemsCount = baseQuery.Count();
+
 
             var addressesDtos = _mapper.Map<List<AddressDto>>(addresses);
 
-            return addressesDtos;
+            var result = new PageResult<AddressDto>(addressesDtos, totalItemsCount, query.PageSize, query.PageNumber);
+
+            return result;
         }
 
         public int CreateAddress(CreateAddressDto dto)
