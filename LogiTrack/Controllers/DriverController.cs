@@ -1,11 +1,13 @@
 ﻿using LogiTrack.Interfaces;
 using LogiTrack.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogiTrack.Controllers
 {
     [Route("/api/company/{companyId}/driver")]
     [ApiController]
+    [Authorize]
     public class DriverController : ControllerBase
     {
         private readonly IDriverService _driverService;
@@ -16,6 +18,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult<IEnumerable<DriverDto>> GetAllDrivers([FromRoute] int companyId, [FromQuery] DriverQuery? query)
         {
             var driversDtos = _driverService.GetAll(companyId, query);
@@ -24,6 +27,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public ActionResult<DriverDto> GetDriverById([FromRoute] int companyId, [FromRoute] int id)
         {
             DriverDto driver = _driverService.GetById(companyId, id);
@@ -32,6 +36,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public ActionResult CreateDriver([FromRoute] int companyId ,[FromBody] CreateDriverDto dto)
         {
             var id = _driverService.CreateDriver(companyId, dto);
@@ -40,6 +45,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult UpdateDriver([FromRoute] int companyId, [FromBody] UpdateDriverDto dto, [FromRoute] int id)
         {
             _driverService.UpdateDriver(companyId, id, dto);
@@ -48,6 +54,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public ActionResult DeleteDriver([FromRoute] int companyId, [FromRoute] int id)
         {
             _driverService.DeleteDriver(companyId, id);
@@ -56,6 +63,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpDelete]
+        [Authorize(Roles = "Admin")]
         public ActionResult DeleteAllDrivers([FromRoute] int companyId)
         {
             _driverService.DeleteAllDrivers(companyId);

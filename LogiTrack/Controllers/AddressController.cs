@@ -2,12 +2,14 @@
 using LogiTrack.Entities;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogiTrack.Controllers
 {
     [Route("api/address")]
     [ApiController]
+    [Authorize]
     public class AddressController : ControllerBase
     {
         private readonly IAddressService _addressService;
@@ -18,6 +20,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult<IEnumerable<AddressDto>> GetAllAddresses([FromQuery] AddressQuery? query)
         {
             var addressesDtos = _addressService.GetAll(query);
@@ -26,6 +29,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public ActionResult<AddressDto> GetAddressById([FromRoute] int id)
         {
             var address = _addressService.GetById(id);
@@ -34,6 +38,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles="Admin")]
         public ActionResult CreateAddress([FromBody] CreateAddressDto dto)
         {
             var id = _addressService.CreateAddress(dto);
@@ -42,6 +47,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult UpdateAddress([FromBody]UpdateAddressDto dto, [FromRoute] int id)
         {
             _addressService.UpdateAddress(id, dto);
@@ -50,6 +56,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public ActionResult DeleteAddress([FromRoute] int id)
         {
             _addressService.DeleteAdderss(id);

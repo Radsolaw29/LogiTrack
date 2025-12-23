@@ -1,11 +1,13 @@
 ﻿using LogiTrack.Interfaces;
 using LogiTrack.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogiTrack.Controllers
 {
     [Route("/api/company/{companyId}/truck")]
     [ApiController]
+    [Authorize]
     public class TruckController : ControllerBase
     {
         private readonly ITruckService _truckService;
@@ -16,6 +18,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult<IEnumerable<TruckDto>> GetAllTrucks([FromRoute] int companyId, [FromQuery] TruckQuery? query)
         {
             var trucksDtos = _truckService.GetAll(companyId, query);
@@ -24,6 +27,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public ActionResult<TruckDto> GetTruckById([FromRoute] int companyId, [FromRoute] int id)
         {
             var truck = _truckService.GetById(companyId, id);
@@ -32,6 +36,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public ActionResult CreateTruck([FromRoute] int companyId, [FromBody] CreateTruckDto dto)
         {
             var id = _truckService.CreateTruck(companyId, dto);
@@ -40,6 +45,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult UpdateTruck([FromRoute] int companyId, [FromBody] UpdateTruckDto dto, [FromRoute] int id)
         {
             _truckService.UpdateTruck(companyId, id, dto);
@@ -48,6 +54,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public ActionResult DeleteTruck([FromRoute] int companyId, [FromRoute] int id)
         {
             _truckService.DeleteTruck(companyId, id);
@@ -56,6 +63,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpDelete]
+        [Authorize(Roles = "Admin")]
         public ActionResult DeleteAllTrucks([FromRoute] int companyId)
         {
             _truckService.DeleteAllTrucks(companyId);
