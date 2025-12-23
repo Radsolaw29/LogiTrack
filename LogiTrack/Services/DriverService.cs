@@ -4,6 +4,8 @@ using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Linq.Expressions;
 
 namespace LogiTrack.Services
 {
@@ -36,13 +38,48 @@ namespace LogiTrack.Services
             return result;
         }
 
-        public IEnumerable<DriverDto> GetAll(int companyId)
+        public PageResult<DriverDto> GetAll(int companyId, DriverQuery query)
         {
             var company = GetCompanyById(companyId);
 
-            var driversDtos = _mapper.Map<List<DriverDto>>(company.Drivers);
+            var baseQuery = _dbContext
+                .Drivers
+                .Where(x => x.CompanyId == companyId)
+                .Where(x => string.IsNullOrEmpty(query.SearchPhrase)
+                || (x.FirstName.ToLower().Contains(query.SearchPhrase.ToLower())
+                || x.LastName.ToLower().Contains(query.SearchPhrase.ToLower())
+                || x.ContactEmail.ToLower().Contains(query.SearchPhrase.ToLower())));
 
-            return driversDtos;
+            if (!string.IsNullOrEmpty(query.SortBy))
+            {
+                var columnsSelectors = new Dictionary<string, Expression<Func<Driver, object>>>{
+
+                    { nameof(Driver.FirstName), x => x.FirstName },
+                    { nameof(Driver.LastName), x => x.LastName },
+                    { nameof(Driver.LicenseDriving), x => x.LicenseDriving },
+                    { nameof(Driver.ContactEmail), x => x.ContactEmail }
+
+                };
+
+                var selectedColumn = columnsSelectors[query.SortBy];
+
+                baseQuery = query.SortDirection == SortDirection.ASC 
+                    ? baseQuery.OrderBy(selectedColumn)
+                    : baseQuery.OrderByDescending(selectedColumn);
+            }
+
+            var drivers = baseQuery
+                .Skip(query.PageSize * (query.PageNumber -1))
+                .Take(query.PageSize)
+                .ToList();
+
+            var totalItemsCount = baseQuery.Count();
+
+            var driversDtos = _mapper.Map<List<DriverDto>>(drivers);
+
+            var result = new PageResult<DriverDto>(driversDtos, totalItemsCount, query.PageSize, query.PageNumber);
+
+            return result;
         }
 
         public int CreateDriver(int companyId, CreateDriverDto dto)

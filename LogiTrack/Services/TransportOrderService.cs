@@ -5,6 +5,7 @@ using LogiTrack.Interfaces;
 using LogiTrack.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace LogiTrack.Services
 {
@@ -21,13 +22,43 @@ namespace LogiTrack.Services
             _logger = logger;
         }
 
-        public IEnumerable<TransportOrderDto> GetAllTransportOrders(int companyId)
+        public PageResult<TransportOrderDto> GetAllTransportOrders(int companyId, TransportOrderQuery query)
         {
             var company = GetCompanyById(companyId);
 
-            var transportOrdersDtos = _mapper.Map<List<TransportOrderDto>>(company.TransportOrders);
+            var baseQuery = _dbContext
+                .Orders
+                .Where(x => query.SearchPhrase == null 
+                ||(x.OrderName.ToLower().Contains(query.SearchPhrase.ToLower())
+                || x.Description.ToLower().Contains(query.SearchPhrase.ToLower())));
 
-            return transportOrdersDtos;
+            if (!string.IsNullOrEmpty(query.SortBy))
+            {
+                var columnsSelectors = new Dictionary<string, Expression<Func<TransportOrder, object>>>
+                {
+                    { nameof(TransportOrder.OrderName), x => x.OrderName },
+                    { nameof(TransportOrder.Description), r => r.Description }
+                };
+
+                var selectedColumns = columnsSelectors[query.SortBy];
+
+                baseQuery = query.SortDirection == SortDirection.ASC
+                    ? baseQuery.OrderBy(selectedColumns)
+                    : baseQuery.OrderByDescending(selectedColumns);
+            }
+
+            var transportOrders = baseQuery
+                .Skip(query.PageSize * (query.PageNumber - 1))
+                .Take(query.PageSize)
+                .ToList();
+
+            var totalItemsCount = baseQuery.Count();
+
+            var transportOrdersDtos = _mapper.Map<List<TransportOrderDto>>(transportOrders);
+
+            var result = new PageResult<TransportOrderDto>(transportOrdersDtos, totalItemsCount, query.PageSize, query.PageNumber);
+
+            return result;
         }
 
         public TransportOrderDto GetTransportOrderById(int companyId, int id)

@@ -16,9 +16,9 @@ namespace LogiTrack.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<DriverDto>> GetAllDrivers([FromRoute] int companyId)
+        public ActionResult<IEnumerable<DriverDto>> GetAllDrivers([FromRoute] int companyId, [FromQuery] DriverQuery? query)
         {
-            var driversDtos = _driverService.GetAll(companyId);
+            var driversDtos = _driverService.GetAll(companyId, query);
 
             return Ok(driversDtos);
         }

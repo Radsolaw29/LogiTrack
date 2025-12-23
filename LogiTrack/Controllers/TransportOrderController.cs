@@ -16,9 +16,9 @@ namespace LogiTrack.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<TransportOrderDto>> GetAllTransportOrder([FromRoute] int companyId)
+        public ActionResult<IEnumerable<TransportOrderDto>> GetAllTransportOrder([FromRoute] int companyId, [FromQuery] TransportOrderQuery? query)
         {
-            var transportOrders = _transportOrderService.GetAllTransportOrders(companyId);
+            var transportOrders = _transportOrderService.GetAllTransportOrders(companyId, query);
 
             return Ok(transportOrders);
         }

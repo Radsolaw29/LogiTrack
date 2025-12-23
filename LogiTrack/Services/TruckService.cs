@@ -4,6 +4,7 @@ using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace LogiTrack.Services
 {
@@ -36,13 +37,46 @@ namespace LogiTrack.Services
             return result;
         }
 
-        public IEnumerable<TruckDto> GetAll(int companyId)
+        public PageResult<TruckDto> GetAll(int companyId, TruckQuery query)
         {
             var company = GetCompanyById(companyId);
 
-            var tracksDtos = _mapper.Map<List<TruckDto>>(company.Trucks);
+            var baseQuery = _dbContext
+                .Trucks
+                .Where(x => x.CompanyId == companyId)
+                .Where(x => string.IsNullOrEmpty(query.SearchPhrase)
+                || (x.RegistrationNumber.ToLower().Contains(query.SearchPhrase.ToLower())
+                || x.Brand.ToLower().Contains(query.SearchPhrase.ToLower())
+                || x.Model.ToLower().Contains(query.SearchPhrase.ToLower())));
 
-            return tracksDtos;
+            if (!string.IsNullOrEmpty(query.SortBy))
+            {
+                var columnsSelectors = new Dictionary<string, Expression<Func<Truck, object>>>
+                {
+                    { nameof(Truck.RegistrationNumber), x => x.RegistrationNumber },
+                    { nameof(Truck.Brand), x => x.Brand },
+                    { nameof(Truck.Model), x => x.Model }
+                };
+
+                var selectedColumn = columnsSelectors[query.SortBy];
+
+                baseQuery = query.SortDirection == SortDirection.ASC
+                    ? baseQuery.OrderBy(selectedColumn)
+                    : baseQuery.OrderByDescending(selectedColumn);
+            }
+
+            var truck = baseQuery
+                .Skip(query.PageSize * (query.PageNumber - 1))
+                .Take(query.PageSize)
+                .ToList();
+
+            var totalItemsCount = baseQuery.Count();
+
+            var tracksDtos = _mapper.Map<List<TruckDto>>(truck);
+
+            var result = new PageResult<TruckDto>(tracksDtos, totalItemsCount, query.PageSize, query.PageNumber);
+
+            return result;
         }
 
         public int CreateTruck(int companyId, CreateTruckDto dto)

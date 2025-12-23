@@ -4,7 +4,7 @@ namespace LogiTrack.Interfaces
 {
     public interface ITruckService
     {
-        IEnumerable<TruckDto> GetAll(int companyId);
+        PageResult<TruckDto> GetAll(int companyId, TruckQuery query);
         TruckDto GetById(int companyId, int id);
         int CreateTruck(int companyId, CreateTruckDto dto);
         void UpdateTruck(int companyId, int id, UpdateTruckDto dto);

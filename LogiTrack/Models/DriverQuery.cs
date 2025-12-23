@@ -1,6 +1,6 @@
 ﻿namespace LogiTrack.Models
 {
-    public class CompanyQuery
+    public class DriverQuery
     {
         public string SearchPhrase { get; set; } = string.Empty;
         public int PageNumber { get; set; }

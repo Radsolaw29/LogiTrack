@@ -23,7 +23,7 @@ namespace LogiTrack.Controllers
         
         [HttpGet]
         [Authorize(Roles ="Admin,Manager")]
-        public ActionResult<IEnumerable<CompanyDto>> GetAllCompanies([FromQuery] CompanyQuery query)
+        public ActionResult<IEnumerable<CompanyDto>> GetAllCompanies([FromQuery] CompanyQuery? query)
         {
             var companiesDtos = _companyService.GetAll(query);
 

@@ -18,7 +18,7 @@ namespace LogiTrack.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<AddressDto>> GetAllAddresses([FromQuery] AddressQuery query)
+        public ActionResult<IEnumerable<AddressDto>> GetAllAddresses([FromQuery] AddressQuery? query)
         {
             var addressesDtos = _addressService.GetAll(query);
 

@@ -39,8 +39,8 @@ namespace LogiTrack.Services
         {
             var baseQuery = _dbContext
                 .Addresses
-                .Where(x => query.SearchPhrase == null ||
-                (x.Country.ToLower().Contains(query.SearchPhrase.ToLower())
+                .Where(x => query.SearchPhrase == null 
+                ||(x.Country.ToLower().Contains(query.SearchPhrase.ToLower())
                 || x.City.ToLower().Contains(query.SearchPhrase.ToLower())
                 || x.Street.ToLower().Contains(query.SearchPhrase.ToLower())));
 
@@ -61,12 +61,12 @@ namespace LogiTrack.Services
             }
 
 
-            var addresses = baseQuery.Skip(query.PageSize * (query.PageNumber - 1))
+            var addresses = baseQuery
+                .Skip(query.PageSize * (query.PageNumber - 1))
                 .Take(query.PageSize)
                 .ToList();
 
             var totalItemsCount = baseQuery.Count();
-
 
             var addressesDtos = _mapper.Map<List<AddressDto>>(addresses);
 
