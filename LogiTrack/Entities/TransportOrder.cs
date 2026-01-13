@@ -8,6 +8,9 @@
         public string Description { get; set; } = string.Empty;
         public int Price { get; set; }
 
+        public int? CreatedById { get; set; }
+        public virtual User CreatedBy { get; set; }
+
         public int CompanyId { get; set; }
         public virtual Company Company { get; set; }
 

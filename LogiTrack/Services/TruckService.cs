@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using LogiTrack.Authorization;
 using LogiTrack.Entities;
 using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -13,12 +15,17 @@ namespace LogiTrack.Services
         private readonly LogiTrackDbContext _dbContext;
         private readonly IMapper _mapper;
         private readonly ILogger<TruckService> _logger;
+        private readonly IAuthorizationService _authorizationService;
+        private readonly IUserContextService _userContextService;
 
-        public TruckService(LogiTrackDbContext dbContext, IMapper mapper, ILogger<TruckService> logger)
+        public TruckService(LogiTrackDbContext dbContext, IMapper mapper, ILogger<TruckService> logger,
+            IAuthorizationService authorizationService, IUserContextService userContextService)
         {
             _dbContext = dbContext;
             _mapper = mapper;
             _logger = logger;
+            _authorizationService = authorizationService;
+            _userContextService = userContextService;
         }
 
         public TruckDto GetById(int companyId, int id)
@@ -86,7 +93,7 @@ namespace LogiTrack.Services
             var truck = _mapper.Map<Truck>(dto);
 
             truck.CompanyId = companyId;
-
+            truck.CreatedById = _userContextService.GetUserId;
             _dbContext.Trucks.Add(truck);
             _dbContext.SaveChanges();
 
@@ -103,6 +110,12 @@ namespace LogiTrack.Services
 
             if (truck is null)
                 throw new NotFoundException("Truck not found");
+
+            var authorizationResult =
+                _authorizationService.AuthorizeAsync(_userContextService.User, truck, new ResourcerceOperationRequirement(ResourceOperation.Update)).Result;
+
+            if (!authorizationResult.Succeeded)
+                throw new ForbidException("You don't have permission to update this truck");
 
             truck.RegistrationNumber = dto.RegistrationNumber;
             truck.Brand = dto.Brand;
@@ -127,6 +140,12 @@ namespace LogiTrack.Services
 
             if (truck is null)
                 throw new NotFoundException("Truck not found");
+
+            var authorizationResult =
+                _authorizationService.AuthorizeAsync(_userContextService.User, truck, new ResourcerceOperationRequirement(ResourceOperation.Delete)).Result;
+
+            if (!authorizationResult.Succeeded)
+                throw new ForbidException("You don't have permission to delete this truck");
 
             _dbContext.Trucks.Remove(truck);
             _dbContext.SaveChanges();

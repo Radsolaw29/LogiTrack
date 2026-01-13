@@ -50,6 +50,10 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddScoped<IAuthorizationHandler, ResourcerceOperationRequirementHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, TransportOrderResourceOperationRequirmentHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, DriverResourceOperationRequirementHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, TruckResourceOperationRequirementHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, AddressResourceOperationRequirementHandler>();
 builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();

@@ -108,7 +108,8 @@ namespace LogiTrack.Services
             if(company is null) 
                 throw new NotFoundException("Company not found");
 
-            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User, company, new ResourcerceOperationRequirement(ResourceOperation.Update)).Result;
+            var authorizationResult = 
+                _authorizationService.AuthorizeAsync(_userContextService.User, company, new ResourcerceOperationRequirement(ResourceOperation.Update)).Result;
 
             if (!authorizationResult.Succeeded)
                 throw new ForbidException("You do not have permission to access this resource.");
@@ -132,7 +133,8 @@ namespace LogiTrack.Services
             if (company is null) 
                 throw new NotFoundException("Company not found");
 
-            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User, company, new ResourcerceOperationRequirement(ResourceOperation.Delete)).Result;
+            var authorizationResult = 
+                _authorizationService.AuthorizeAsync(_userContextService.User, company, new ResourcerceOperationRequirement(ResourceOperation.Delete)).Result;
 
             if (!authorizationResult.Succeeded)
                 throw new ForbidException("You do not have permission to access this resource.");

@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using LogiTrack.Authorization;
 using LogiTrack.Entities;
 using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -14,12 +16,17 @@ namespace LogiTrack.Services
         private readonly LogiTrackDbContext _dbContext;
         private readonly IMapper _mapper;
         private readonly ILogger<TransportOrderService> _logger;
+        private readonly IAuthorizationService _authorizationService;
+        private readonly IUserContextService _userContextService;
 
-        public TransportOrderService(LogiTrackDbContext dbContext, IMapper mapper, ILogger<TransportOrderService> logger)
+        public TransportOrderService(LogiTrackDbContext dbContext, IMapper mapper, ILogger<TransportOrderService> logger,
+            IAuthorizationService authorizationService, IUserContextService contextService)
         {
             _dbContext = dbContext;
             _mapper = mapper;
             _logger = logger;
+            _authorizationService = authorizationService;
+            _userContextService = contextService;
         }
 
         public PageResult<TransportOrderDto> GetAllTransportOrders(int companyId, TransportOrderQuery query)
@@ -84,7 +91,7 @@ namespace LogiTrack.Services
             var transportOrder = _mapper.Map<TransportOrder>(dto);
 
             transportOrder.CompanyId = companyId;
-
+            transportOrder.CreatedById = _userContextService.GetUserId;
             _dbContext.Orders.Add(transportOrder);
             _dbContext.SaveChanges();
 
@@ -101,6 +108,12 @@ namespace LogiTrack.Services
 
             if (transportOrder is null)
                 throw new NotFoundException("Transport order not found");
+
+            var authorizationResult =
+                _authorizationService.AuthorizeAsync(_userContextService.User, transportOrder, new ResourcerceOperationRequirement(ResourceOperation.Update)).Result;
+
+            if(!authorizationResult.Succeeded)
+                throw new ForbidException("You don't have permission to update this transport order");
 
             transportOrder.OrderName = dto.OrderName;
             transportOrder.Description = dto.Description;
@@ -125,6 +138,12 @@ namespace LogiTrack.Services
 
             if (transportOrder is null)
                 throw new NotFoundException("Transport order not found");
+
+            var authorizationResult =
+                _authorizationService.AuthorizeAsync(_userContextService.User, transportOrder, new ResourcerceOperationRequirement(ResourceOperation.Delete)).Result;
+
+            if(!authorizationResult.Succeeded)
+                throw new ForbidException("You don't have permission to delete this transport order");
 
             _dbContext.Orders.Remove(transportOrder);
             _dbContext.SaveChanges();

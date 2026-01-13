@@ -11,6 +11,9 @@
         public string LicenseDriving { get; set; } = string.Empty;
         public int PhoneNumber { get; set; }
         public string ContactEmail { get; set; } = string.Empty;
+        public int? CreatedById { get; set; }
+        public virtual User? CreatedBy { get; set; }
+
 
         public int CompanyId { get; set; }
         public virtual Company Company { get; set; }

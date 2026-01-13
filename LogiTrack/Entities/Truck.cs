@@ -12,6 +12,9 @@
         public decimal CapacityTons { get; set; }
         public string Type { get; set; } = string.Empty;
 
+        public int? CreatedById { get; set; }
+        public virtual User CreatedBy { get; set; }
+
         public virtual Company Company { get; set; }
         public virtual List<TransportOrder> TransportOrders { get; set; } = new();
 

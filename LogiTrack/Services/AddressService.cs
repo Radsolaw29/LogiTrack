@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using LogiTrack.Authorization;
 using LogiTrack.Entities;
 using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Linq.Expressions;
 
@@ -13,12 +15,17 @@ namespace LogiTrack.Services
         private readonly LogiTrackDbContext _dbContext;
         private readonly IMapper _mapper;
         private readonly ILogger<AddressService> _logger;
+        private readonly IAuthorizationService _authorizationService;
+        private readonly IUserContextService _userContextService;
 
-        public AddressService(LogiTrackDbContext dbContext, IMapper mapper, ILogger<AddressService> logger)
+        public AddressService(LogiTrackDbContext dbContext, IMapper mapper, ILogger<AddressService> logger,
+            IAuthorizationService authorizationService, IUserContextService userContextService)
         {
             _dbContext = dbContext;
             _mapper = mapper;
             _logger = logger;
+            _authorizationService = authorizationService;
+            _userContextService = userContextService;
         }
 
         public AddressDto GetById(int id)
@@ -79,6 +86,7 @@ namespace LogiTrack.Services
         {
             var address = _mapper.Map<Address>(dto);
 
+            address.CreatedById = _userContextService.GetUserId;
             _dbContext.Addresses.Add(address);
             _dbContext.SaveChanges();
 
@@ -93,6 +101,12 @@ namespace LogiTrack.Services
 
             if (address is null)
                 throw new NotFoundException("Address not found");
+
+            var authorizationResult =
+                _authorizationService.AuthorizeAsync(_userContextService.User, address, new ResourcerceOperationRequirement(ResourceOperation.Update)).Result;
+
+            if (!authorizationResult.Succeeded)
+                throw new ForbidException("You don't have permission to update this address");
 
             address.Country = dto.Country;
             address.City = dto.City;
@@ -112,6 +126,12 @@ namespace LogiTrack.Services
 
             if(address is null)
                 throw new NotFoundException("Address not found");
+
+            var authorizationResult =
+                _authorizationService.AuthorizeAsync(_userContextService.User, address, new ResourcerceOperationRequirement(ResourceOperation.Delete)).Result;
+
+            if (!authorizationResult.Succeeded)
+                throw new ForbidException("You don't have permission to delete this address");
 
             _dbContext.Addresses.Remove(address);
             _dbContext.SaveChanges();

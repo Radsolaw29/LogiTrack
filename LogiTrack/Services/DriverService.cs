@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using LogiTrack.Authorization;
 using LogiTrack.Entities;
 using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Linq.Expressions;
@@ -14,12 +16,17 @@ namespace LogiTrack.Services
         private readonly LogiTrackDbContext _dbContext;
         private readonly IMapper _mapper;
         private readonly ILogger<DriverService> _logger;
+        private readonly IAuthorizationService _authorizationService;
+        private readonly IUserContextService _userContextService;
 
-        public DriverService(LogiTrackDbContext dbContext, IMapper mapper, ILogger<DriverService> logger)
+        public DriverService(LogiTrackDbContext dbContext, IMapper mapper, ILogger<DriverService> logger,
+            IAuthorizationService authorizationService, IUserContextService userContextService)
         {
             _dbContext = dbContext;
             _mapper = mapper;
             _logger = logger;
+            _authorizationService = authorizationService;
+            _userContextService = userContextService;
         }
 
         public DriverDto GetById(int companyId, int id)
@@ -89,7 +96,7 @@ namespace LogiTrack.Services
             var driver = _mapper.Map<Driver>(dto);
 
             driver.CompanyId = companyId;
-
+            driver.CreatedById = _userContextService.GetUserId;
             _dbContext.Drivers.Add(driver);
             _dbContext.SaveChanges();
 
@@ -106,6 +113,12 @@ namespace LogiTrack.Services
 
             if (driver is null)
                 throw new NotFoundException("Driver not found");
+
+            var authorizationResult =
+                _authorizationService.AuthorizeAsync(_userContextService.User, driver, new ResourcerceOperationRequirement(ResourceOperation.Update)).Result;
+
+            if (!authorizationResult.Succeeded)
+                throw new ForbidException("You don't have permission to update this driver");
 
             driver.FirstName = dto.FirstName;
             driver.LastName = dto.LastName;
@@ -130,6 +143,12 @@ namespace LogiTrack.Services
 
             if (driver is null)
                 throw new NotFoundException("Driver not found");
+
+            var authorizationResult =
+                _authorizationService.AuthorizeAsync(_userContextService.User, driver, new ResourcerceOperationRequirement(ResourceOperation.Delete)).Result;
+
+            if (!authorizationResult.Succeeded)
+                throw new ForbidException("You don't have permission to delete this driver");
 
             _dbContext.Drivers.Remove(driver);
             _dbContext.SaveChanges();
