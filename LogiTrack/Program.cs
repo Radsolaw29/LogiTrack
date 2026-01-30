@@ -10,7 +10,10 @@ using LogiTrack.Models.Validators;
 using LogiTrack.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using NLog.Web;
+
+string connectionString = "Server=(localdb)\\mssqllocaldb;Database=LogiTrackDb;Trusted_Connection=True;";
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +22,8 @@ builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
 builder.Host.UseNLog();
 
 // Add services to the container.
-builder.Services.AddDbContext<LogiTrackDbContext>();
+builder.Services.AddDbContext<LogiTrackDbContext>(options =>
+    options.UseSqlServer(connectionString));
 builder.Services.AddScoped<LogiTrackSeeder>();
 
 var authenticationSettings = new AuthenticationSettings();

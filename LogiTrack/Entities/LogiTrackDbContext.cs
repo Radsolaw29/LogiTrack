@@ -4,7 +4,6 @@ namespace LogiTrack.Entities
 {
     public class LogiTrackDbContext: DbContext
     {
-        private readonly string _connectionString = "Server=(localdb)\\mssqllocaldb;Database=LogiTrackDb;Trusted_Connection=True;";
         public DbSet<Company> Companies { get; set; }
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Truck> Trucks { get; set; }
@@ -12,6 +11,8 @@ namespace LogiTrack.Entities
         public DbSet<Driver> Drivers { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
+
+        public LogiTrackDbContext(DbContextOptions<LogiTrackDbContext> options) : base(options) {}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -123,9 +124,9 @@ namespace LogiTrack.Entities
                 .HasPrecision(10, 2);
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer(_connectionString);
-        }
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    optionsBuilder.UseSqlServer(_connectionString);
+        //}
     }
 }
