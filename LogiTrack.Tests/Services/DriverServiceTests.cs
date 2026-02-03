@@ -521,7 +521,7 @@ namespace LogiTrack.Tests.Services
                 new Driver() { Id = 2, CompanyId = companyId },
                 new Driver() { Id = 3, CompanyId = companyId },
                 new Driver() { Id = 4, CompanyId = companyId },
-                new Driver() {Id = 5, CompanyId = 999 }
+                new Driver() { Id = 5, CompanyId = 999 }
             };
 
             _dbContext.Companies.Add(company);
@@ -617,10 +617,10 @@ namespace LogiTrack.Tests.Services
             var firstItem = result.Items.First();
 
             var value = firstItem
-                .GetType()
-                .GetProperty(sortBy)!
-                .GetValue(firstItem)
-                ?.ToString();
+                    .GetType()
+                    .GetProperty(sortBy)!
+                    .GetValue(firstItem)?
+                    .ToString();
 
             value.Should().Be(expectedFirstValue);
         }

@@ -4,7 +4,7 @@ namespace LogiTrack.Models
 {
     public class TruckDto
     {
-
+        public int Id { get; set; }
         [Required]
         [MaxLength(11)]
         public string RegistrationNumber { get; set; } = string.Empty;
