@@ -409,7 +409,7 @@ namespace LogiTrack.Tests.Services
         }
 
         [Fact]
-        public void UpdateCompany_WhenCompanyDoesNotExist_ThhrowsNotFoundException()
+        public void UpdateCompany_WhenCompanyDoesNotExist_ThrowsNotFoundException()
         {
             //Arrange
 
