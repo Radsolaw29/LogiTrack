@@ -17,7 +17,7 @@ namespace LogiTrack.Models.Validators
 
             RuleFor(x => x.ConfirmPassword)
                 .Equal(e => e.Password)
-                .WithMessage("Password and ConfirmPassword nust match.");
+                .WithMessage("Password and ConfirmPassword must match.");
 
             RuleFor(x => x.Email)
                 .Custom((value, context) =>

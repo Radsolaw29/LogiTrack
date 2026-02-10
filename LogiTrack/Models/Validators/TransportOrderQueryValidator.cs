@@ -10,7 +10,7 @@ namespace LogiTrack.Models.Validators
 
         public TransportOrderQueryValidator()
         {
-            RuleFor(x => x.PageNumber).GreaterThanOrEqualTo(1);
+            RuleFor(x => x.PageNumber).GreaterThanOrEqualTo(1).WithMessage("The number of pages must be greater than or equal to 1");
 
             RuleFor(x => x.PageSize).Custom((value, context) =>
             {
