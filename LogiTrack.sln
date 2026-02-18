@@ -5,7 +5,7 @@ VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogiTrack", "LogiTrack\LogiTrack.csproj", "{BE83A471-0981-4D1B-9622-0691FEE7B632}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogiTrack.Tests", "LogiTrack.Tests\LogiTrack.Tests.csproj", "{346BD68C-CB9A-44CF-BE16-25EC0EDDD7F6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogiTrack.UnitTests", "LogiTrack.Tests\LogiTrack.UnitTests.csproj", "{346BD68C-CB9A-44CF-BE16-25EC0EDDD7F6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogiTrack.IntegrationTests", "LogiTrack.IntegrationTests\LogiTrack.IntegrationTests.csproj", "{8289F87F-3B83-4191-B0A2-2996F2462787}"
 EndProject
