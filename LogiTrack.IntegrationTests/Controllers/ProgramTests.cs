@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using LogiTrack.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 

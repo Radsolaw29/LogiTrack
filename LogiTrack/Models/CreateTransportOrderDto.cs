@@ -13,11 +13,11 @@ namespace LogiTrack.Models
         //[Required]
         ////public int CompanyId { get; set; }
         [Required]
-        public int PickupAddressId { get; set; }
+        public int? PickupAddressId { get; set; }
         [Required]
-        public int DeliveryAddressId { get; set; }
+        public int? DeliveryAddressId { get; set; }
         [Required]
-        public int DriverId { get; set; }
+        public int? DriverId { get; set; }
         [Required]
         public int? TruckId { get; set; }
     }

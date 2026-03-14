@@ -5,18 +5,29 @@ namespace LogiTrack.IntegrationTests
 {
     public class FakeUserFilter : IAsyncActionFilter
     {
+        private readonly string _role;
+        private readonly string _userId;
+
+        public FakeUserFilter(string role = "Admin", string userId = "1")
+        {
+            _role = role;
+            _userId = userId;
+        }
+
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            var claimsPrincipal = new ClaimsPrincipal();
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, _userId),
+                new Claim(ClaimTypes.Role, _role)
+            };
 
-            claimsPrincipal.AddIdentity(new ClaimsIdentity(
-                new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, "1"),
-                    new Claim(ClaimTypes.Role, "Admin")
-                }));
+            // "TestScheme" jest wymagane, by Identity.IsAuthenticated było true
+            var identity = new ClaimsIdentity(claims, "TestScheme");
+            var user = new ClaimsPrincipal(identity);
 
-            context.HttpContext.User = claimsPrincipal;
+            // Wstrzykujemy użytkownika do HttpContext
+            context.HttpContext.User = user;
 
             await next();
         }
