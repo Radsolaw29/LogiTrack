@@ -72,7 +72,7 @@ namespace LogiTrack.IntegrationTests.Seed
             db.Addresses.Add(new AddressBuilder().AsPickup().Build());
             db.Addresses.Add(new AddressBuilder().AsDelivery().Build());
             db.Drivers.Add(new DriverBuilder().Build());
-            db.Trucks.Add(new TruckBuilder().Build());
+            db.Trucks.AddRange(new TruckBuilder().Build());
 
             await db.SaveChangesAsync();
         }

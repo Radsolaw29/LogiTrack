@@ -401,8 +401,7 @@ namespace LogiTrack.IntegrationTests.Controllers
 
             var dto = new UpdateTransportOrder
             {
-                Description = "Description",
-
+                Description = "Description"
             };
 
             //Act
