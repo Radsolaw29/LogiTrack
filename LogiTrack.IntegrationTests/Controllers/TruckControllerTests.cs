@@ -497,12 +497,6 @@ namespace LogiTrack.IntegrationTests.Controllers
             response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         }
 
-        //[Fact]
-        //public async Task DeleteTruck_ForNonCompanyOwner_ShouldReturnsForbidden()
-        //{
-            
-        //}
-
         [Fact]
         public async Task DeleteTruck_WhenUserIsNotAdmin_ShouldReturnsForbidden()
         {

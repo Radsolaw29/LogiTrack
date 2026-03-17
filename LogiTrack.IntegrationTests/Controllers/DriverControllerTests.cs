@@ -527,7 +527,6 @@ namespace LogiTrack.IntegrationTests.Controllers
             //Assert
 
             response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-
         }
 
         [Fact]

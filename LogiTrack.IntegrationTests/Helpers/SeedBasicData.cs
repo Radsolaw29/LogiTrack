@@ -13,5 +13,11 @@ namespace LogiTrack.IntegrationTests.Helpers
             await TestDbSeeder.SeedBasicOrderDependencies(factory);
             await TestDbSeeder.SeedBasicTransportOrders(factory);
         }
+
+        public static async Task SeedAddressAsync(WebApplicationFactory<Program> factory)
+        {
+            await TestDbSeeder.ResetDatabase(factory);
+            await TestDbSeeder.SeedBasicAddresses(factory);
+        }
     }
 }

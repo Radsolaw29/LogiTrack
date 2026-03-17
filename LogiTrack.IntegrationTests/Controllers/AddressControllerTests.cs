@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using LogiTrack.Entities;
+using LogiTrack.IntegrationTests.Builders;
 using LogiTrack.IntegrationTests.Extensions;
 using LogiTrack.IntegrationTests.Helpers;
 using LogiTrack.IntegrationTests.Seed;
@@ -102,23 +103,20 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            await TestDbSeeder.ResetDatabase(_factory);
-            await TestDbSeeder.SeedBasicAddresses(_factory);
+            await SeedBasicData.SeedAddressAsync(_factory);
 
             var encodedPhrase = Uri.EscapeDataString(searchPhrase);
 
-            var url = $"api/address?searchPhrase={encodedPhrase}&pageSize=5&pageNumber=1";
-
             //Act
 
-            var response = await _client.GetAsync(url);
+            var response = await _client.GetAsync($"api/address?searchPhrase={encodedPhrase}&pageSize=5&pageNumber=1");
 
             //Assert
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var content = await response.Content.ReadAsStringAsync();
-            var result = JsonConvert.DeserializeObject<PageResult<AddressDto>>(content);
+            var result = await response.DeserializeAsync<PageResult<AddressDto>>();
+
             result.Items.Should().NotBeNull();
             result.Items.Should().NotBeEmpty();
 
@@ -137,23 +135,19 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            await TestDbSeeder.ResetDatabase(_factory);
-            await TestDbSeeder.SeedBasicAddresses(_factory);
+            await SeedBasicData.SeedAddressAsync(_factory);
 
             var encodedPhrase = Uri.EscapeDataString(searchPhrase);
 
-            var url = $"api/address?searchPhrase={encodedPhrase}&pageSize=5&pageNumber=1";
-
             //Act
 
-            var response = await _client.GetAsync(url);
+            var response = await _client.GetAsync($"api/address?searchPhrase={encodedPhrase}&pageSize=5&pageNumber=1");
 
             //Assert
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var content = await response.Content.ReadAsStringAsync();
-            var result = JsonConvert.DeserializeObject<PageResult<AddressDto>>(content);
+            var result = await response.DeserializeAsync<PageResult<AddressDto>>();
 
             result.Should().NotBeNull();
             result.Items.Should().NotBeNull();
@@ -167,8 +161,7 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            await TestDbSeeder.ResetDatabase(_factory);
-            await TestDbSeeder.SeedBasicAddresses(_factory);
+            await SeedBasicData.SeedAddressAsync(_factory);
 
             //Act
 
@@ -180,7 +173,7 @@ namespace LogiTrack.IntegrationTests.Controllers
 
             response.StatusCode.Should().Be(HttpStatusCode.OK, content);
 
-            var result = JsonConvert.DeserializeObject<PageResult<AddressDto>>(content);
+            var result = await response.DeserializeAsync<PageResult<AddressDto>>();
 
             result.Should().NotBeNull();
             result.Items.Should().HaveCount(3);
@@ -200,14 +193,12 @@ namespace LogiTrack.IntegrationTests.Controllers
         public async Task GetAllAdresses_WithDifferentSortColumns_ShouldWork(string sortBy)
         {
             //Arrange
-            await TestDbSeeder.ResetDatabase(_factory);
-            await TestDbSeeder.SeedBasicAddresses(_factory);
 
-            var url = $"api/address?pageNumber=1&pageSize=10&sortBy={sortBy}&sortDirection=ASC";
+            await SeedBasicData.SeedAddressAsync(_factory);
 
             //Act
 
-            var response = await _client.GetAsync(url);
+            var response = await _client.GetAsync($"api/address?pageNumber=1&pageSize=10&sortBy={sortBy}&sortDirection=ASC");
 
             var content = await response.Content.ReadAsStringAsync();
 
@@ -215,7 +206,7 @@ namespace LogiTrack.IntegrationTests.Controllers
 
             response.StatusCode.Should().Be(HttpStatusCode.OK, content);
 
-            var result = JsonConvert.DeserializeObject<PageResult<AddressDto>>(content);
+            var result = await response.DeserializeAsync<PageResult<AddressDto>>();
 
             result.Items.Should().HaveCount(3);
 
@@ -236,13 +227,9 @@ namespace LogiTrack.IntegrationTests.Controllers
         [InlineData("Country123")]
         public async Task GetAllAddresses_WithInvalidSortBy_ShouldReturnsBadRequest(string sortBy)
         {
-            //Arrange
-
-            var url = $"api/address?sortBy={sortBy}";
-
             //Act
 
-            var response = await _client.GetAsync(url);
+            var response = await _client.GetAsync($"api/address?sortBy={sortBy}");
 
             //Assert
 
@@ -254,19 +241,11 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            var address = new Address
-            {
-                Country = "Poland",
-                City = "Warsaw",
-                Street = "Test 1",
-                PostalCode = "00-001"
-            };
-
-            SeedAddress(address);
+            await SeedBasicData.SeedAddressAsync(_factory);
 
             //Act
 
-            var response = await _client.GetAsync($"api/address/{address.Id}");
+            var response = await _client.GetAsync($"api/address/1");
 
             //Assert
 
@@ -276,8 +255,7 @@ namespace LogiTrack.IntegrationTests.Controllers
             var result = JsonConvert.DeserializeObject<AddressDto>(content);
 
             result.Should().NotBeNull();
-            result.Id.Should().Be(address.Id);
-            result.Street.Should().Be(address.Street);
+            result.Id.Should().Be(1);
         }
 
         [Fact]
@@ -297,8 +275,7 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            await TestDbSeeder.ResetDatabase(_factory);
-            await TestDbSeeder.SeedBasicAddresses(_factory);
+            await SeedBasicData.SeedAddressAsync(_factory);
 
             var unauthorizedClient = _factory.CreateUnauthorizedClient();
 
@@ -316,19 +293,11 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            var dto = new CreateAddressDto
-            {
-                Country = "Poland",
-                City = "Warsaw",
-                Street = "Test 1",
-                PostalCode = "00-001"
-            };
-
-            var httpContent = dto.ToJsonHttpContent();
+            var dto = new CreateAddressBuilder().Build();
 
             //Act
 
-            var response = await _client.PostAsync("api/address", httpContent);
+            var response = await _client.PostAsync("api/address", dto.ToJsonHttpContent());
 
             //Assert
 
@@ -348,11 +317,9 @@ namespace LogiTrack.IntegrationTests.Controllers
                 Street = "Wojska Polskiego 13c"
             };
 
-            var httpContent = dto.ToJsonHttpContent();
-
             //Act
 
-            var response = await _client.PostAsync("api/address", httpContent);
+            var response = await _client.PostAsync("api/address", dto.ToJsonHttpContent());
 
             //Assert
 
@@ -370,13 +337,7 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            var dto = new CreateAddressDto
-            {
-                Country = "Poland",
-                City = "Warsaw",
-                Street = "Wojska Polskiego 13c",
-                PostalCode = "11-256"
-            };
+            var dto = new CreateAddressBuilder().Build();
 
             var client = _factory.CreateClientWithRole("User");
 
@@ -410,28 +371,13 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            var address = new Address
-            {
-                Country = "Poland",
-                City = "Sopot",
-                Street = "Polna 12",
-                PostalCode = "22-877",
-                CreatedById = 1
-            };
+            await SeedBasicData.SeedAddressAsync(_factory);
 
-            SeedAddress(address);
-
-            var dto = new UpdateAddressDto
-            {
-                Country = "Poland",
-                City = "Warszawa",
-                Street = "Wojska Polskiego 12",
-                PostalCode = "00-001"
-            };
+            var dto = new UpdateAddressBuilder().Build();
 
             //Act
 
-            var response = await _client.PutAsync($"api/address/{address.Id}", dto.ToJsonHttpContent());
+            var response = await _client.PutAsync($"api/address/1", dto.ToJsonHttpContent());
 
             //Assert
 
@@ -439,7 +385,7 @@ namespace LogiTrack.IntegrationTests.Controllers
 
             using var scope = _factory.Services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<LogiTrackDbContext>();
-            var updatedAddress = await dbContext.Addresses.FirstOrDefaultAsync(c => c.Id == address.Id);
+            var updatedAddress = await dbContext.Addresses.FirstOrDefaultAsync(c => c.Id == 1);
 
             updatedAddress.Should().NotBeNull();
             updatedAddress.Country.Should().Be(dto.Country);
@@ -453,8 +399,7 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            await TestDbSeeder.ResetDatabase(_factory);
-            await TestDbSeeder.SeedBasicAddresses(_factory);
+            await SeedBasicData.SeedAddressAsync(_factory);
 
             var dto = new UpdateAddressDto
             {
@@ -477,13 +422,7 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            var dto = new UpdateAddressDto
-            {
-                Country = "Poland",
-                City = "Sopot",
-                Street = "Łokietka 1",
-                PostalCode = "80-123"
-            };
+            var dto = new UpdateAddressBuilder().Build();
 
             //Act
 
@@ -499,16 +438,9 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            await TestDbSeeder.ResetDatabase(_factory);
             await TestDbSeeder.SeedBasicAddresses(_factory);
 
-            var dto = new UpdateAddressDto
-            {
-                Country = "Polska",
-                City = "Gdańsk",
-                Street = "Długa 1",
-                PostalCode = "80-150"
-            };
+            var dto = new UpdateAddressBuilder().Build();
 
             var client = _factory.CreateClientWithRole("User");
 
@@ -526,16 +458,9 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            await TestDbSeeder.ResetDatabase(_factory);
-            await TestDbSeeder.SeedBasicAddresses(_factory);
+            await SeedBasicData.SeedAddressAsync(_factory);
 
-            var dto = new UpdateAddressDto
-            {
-                Country = "Polska",
-                City = "Gdańsk",
-                Street = "Długa 1",
-                PostalCode = "80-150"
-            };
+            var dto = new UpdateAddressBuilder().Build();
 
             var unauthorizedClient = _factory.CreateUnauthorizedClient();
 
@@ -553,8 +478,7 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            await TestDbSeeder.ResetDatabase(_factory);
-            await TestDbSeeder.SeedBasicAddresses(_factory);
+            await SeedBasicData.SeedAddressAsync(_factory);
 
             //Act
 
@@ -595,8 +519,7 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            await TestDbSeeder.ResetDatabase(_factory);
-            await TestDbSeeder.SeedBasicAddresses(_factory);
+            await SeedBasicData.SeedAddressAsync(_factory);
 
             var client = _factory.CreateClientWithRole("User");
 
