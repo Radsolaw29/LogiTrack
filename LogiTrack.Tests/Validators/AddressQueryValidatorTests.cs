@@ -7,15 +7,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LogiTrack.Tests.Services
+namespace LogiTrack.UnitTests.Validators
 {
-    public class TruckQueryValidatorTests
+    public class AddressQueryValidatorTests
     {
-        private readonly TruckQueryValidator _validator;
+        private readonly AddressQueryValidator _validator;
 
-        public TruckQueryValidatorTests()
+        public AddressQueryValidatorTests()
         {
-            _validator = new TruckQueryValidator();
+            _validator = new AddressQueryValidator();
         }
 
         [Fact]
@@ -23,7 +23,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new TruckQuery
+            var query = new AddressQuery
             {
                 PageNumber = 0,
                 PageSize = 10
@@ -44,7 +44,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new TruckQuery
+            var query = new AddressQuery
             {
                 PageNumber = 1,
                 PageSize = 10
@@ -70,7 +70,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var queru = new TruckQuery
+            var queru = new AddressQuery
             {
                 PageNumber = 1,
                 PageSize = pageSize
@@ -95,7 +95,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new TruckQuery
+            var query = new AddressQuery
             {
                 PageNumber = 1,
                 PageSize = pageSize
@@ -115,7 +115,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new TruckQuery
+            var query = new AddressQuery
             {
                 PageNumber = 1,
                 PageSize = 10,
@@ -136,7 +136,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arragne
 
-            var query = new TruckQuery
+            var query = new AddressQuery
             {
                 PageNumber = 1,
                 PageSize = 10,
@@ -153,14 +153,14 @@ namespace LogiTrack.Tests.Services
         }
 
         [Theory]
-        [InlineData("RegistrationNumber")]
-        [InlineData("Brand")]
-        [InlineData("Model")]
+        [InlineData("Country")]
+        [InlineData("City")]
+        [InlineData("Street")]
         public void Validate_ForValidSortBy_ShouldNotReturnsValidationError(string sortBy)
         {
             //Arrange
 
-            var query = new TruckQuery
+            var query = new AddressQuery
             {
                 PageNumber = 1,
                 PageSize = 10,
@@ -181,7 +181,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new TruckQuery
+            var query = new AddressQuery
             {
                 PageNumber = 1,
                 PageSize = 10,
@@ -195,7 +195,7 @@ namespace LogiTrack.Tests.Services
             //Assert
 
             result.ShouldHaveValidationErrorFor(x => x.SortBy)
-                .WithErrorMessage("Sort by is optional or must be in [RegistrationNumber,Brand,Model]");
+                .WithErrorMessage("Sort by is optional, or must be in [Country,City,Street]");
         }
     }
 }

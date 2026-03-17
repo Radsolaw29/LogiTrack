@@ -9,19 +9,19 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LogiTrack.Tests.Services
+namespace LogiTrack.UnitTests.Handlers
 {
-    public class AddressResourceOperationRequirementHandlerTests
+    public class ResourcerceOperationRequirementHandlerTests
     {
 
-        private readonly AddressResourceOperationRequirementHandler _handler;
+        private readonly ResourcerceOperationRequirementHandler _handler;
 
-        public AddressResourceOperationRequirementHandlerTests()
+        public ResourcerceOperationRequirementHandlerTests()
         {
-            _handler = new AddressResourceOperationRequirementHandler();
+            _handler = new ResourcerceOperationRequirementHandler();
         }
 
-        private static AuthorizationHandlerContext CreateContext(ResourceOperation resourceOperation, Address address, int userId)
+        private static AuthorizationHandlerContext CreateContext(ResourceOperation resourceOperation, Company company, int userId)
         {
             var requirement = new ResourcerceOperationRequirement(resourceOperation);
 
@@ -33,7 +33,7 @@ namespace LogiTrack.Tests.Services
             return new AuthorizationHandlerContext(
                 new[] { requirement },
                 user,
-                address);
+                company);
         }
 
         [Theory]
@@ -43,9 +43,9 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var address = new Address { CreatedById = 999 };
+            var company = new Company { CreatedById = 999 };
 
-            var context = CreateContext(resourceOperation, address, userId: 1);
+            var context = CreateContext(resourceOperation, company, userId: 1);
 
             //Act
 
@@ -62,9 +62,9 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var address = new Address { CreatedById = 999 };
+            var company = new Company { CreatedById = 999 };
 
-            var context = CreateContext(ResourceOperation.Update, address, userId: 999);
+            var context = CreateContext(ResourceOperation.Update, company, userId: 999);
 
             //Act
 
@@ -81,9 +81,9 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var address = new Address { CreatedById = 999 };
+            var company = new Company { CreatedById = 999 };
 
-            var context = CreateContext(ResourceOperation.Delete, address, userId: 1);
+            var context = CreateContext(ResourceOperation.Delete, company, userId: 1);
 
             //Act
 

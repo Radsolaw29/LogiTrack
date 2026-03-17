@@ -8,7 +8,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LogiTrack.Tests.Services
+namespace LogiTrack.UnitTests.Context
 {
     public class UserContextServiceTests
     {

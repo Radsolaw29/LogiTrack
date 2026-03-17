@@ -1,21 +1,21 @@
-﻿using LogiTrack.Models;
+﻿using FluentValidation.TestHelper;
+using LogiTrack.Models;
 using LogiTrack.Models.Validators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FluentValidation.TestHelper;
 
-namespace LogiTrack.Tests.Services
+namespace LogiTrack.UnitTests.Validators
 {
-    public class CompanyQueryValidatorTests
+    public class DriverQueryValidatorTests
     {
-        private readonly CompanyQueryValidator _validator;
+        private readonly DriverQueryValidator _validator;
 
-        public CompanyQueryValidatorTests()
+        public DriverQueryValidatorTests()
         {
-            _validator = new CompanyQueryValidator();
+            _validator = new DriverQueryValidator();
         }
 
         [Fact]
@@ -23,7 +23,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new CompanyQuery
+            var query = new DriverQuery
             {
                 PageNumber = 0,
                 PageSize = 10
@@ -44,7 +44,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new CompanyQuery
+            var query = new DriverQuery
             {
                 PageNumber = 1,
                 PageSize = 10
@@ -70,7 +70,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var queru = new CompanyQuery
+            var queru = new DriverQuery
             {
                 PageNumber = 1,
                 PageSize = pageSize
@@ -83,7 +83,7 @@ namespace LogiTrack.Tests.Services
             //Assert
 
             result.ShouldHaveValidationErrorFor(x => x.PageSize)
-                .WithErrorMessage("PageSize must be in [5,10,20,50]");
+                .WithErrorMessage("Page size must be in [5,10,20,50]");
         }
 
         [Theory]
@@ -95,7 +95,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new CompanyQuery
+            var query = new DriverQuery
             {
                 PageNumber = 1,
                 PageSize = pageSize
@@ -115,7 +115,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new CompanyQuery
+            var query = new DriverQuery
             {
                 PageNumber = 1,
                 PageSize = 10,
@@ -136,7 +136,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arragne
 
-            var query = new CompanyQuery
+            var query = new DriverQuery
             {
                 PageNumber = 1,
                 PageSize = 10,
@@ -153,16 +153,17 @@ namespace LogiTrack.Tests.Services
         }
 
         [Theory]
-        [InlineData("Name")]
-        [InlineData("Description")]
+        [InlineData("FirstName")]
+        [InlineData("LastName")]
+        [InlineData("LicenseDriving")]
         [InlineData("ContactEmail")]
         public void Validate_ForValidSortBy_ShouldNotReturnsValidationError(string sortBy)
         {
             //Arrange
 
-            var query = new CompanyQuery
+            var query = new DriverQuery
             {
-                PageNumber= 1,
+                PageNumber = 1,
                 PageSize = 10,
                 SortBy = sortBy
             };
@@ -181,7 +182,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new CompanyQuery
+            var query = new DriverQuery
             {
                 PageNumber = 1,
                 PageSize = 10,
@@ -195,7 +196,7 @@ namespace LogiTrack.Tests.Services
             //Assert
 
             result.ShouldHaveValidationErrorFor(x => x.SortBy)
-                .WithErrorMessage("Sort by is optional, or must be in [Name,Description,ContactEmail]");
+                .WithErrorMessage("Sort by is optional or must be in [FirstName,LastName,LicenseDriving,ContactEmail]");
         }
     }
 }

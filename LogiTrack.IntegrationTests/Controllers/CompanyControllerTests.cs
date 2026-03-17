@@ -103,11 +103,9 @@ namespace LogiTrack.IntegrationTests.Controllers
 
             var encodedPhrase = Uri.EscapeDataString(searchPhrase);
 
-            var url = $"api/company?searchPhrase={encodedPhrase}&pageSize=5&pageNumber=1";
-
             //Act
 
-            var response = await _client.GetAsync(url);
+            var response = await _client.GetAsync($"api/company?searchPhrase={encodedPhrase}&pageSize=5&pageNumber=1");
 
             //Assert
 
@@ -136,11 +134,9 @@ namespace LogiTrack.IntegrationTests.Controllers
 
             var encodedPhrase = Uri.EscapeDataString(searchPhrase);
 
-            var url = $"api/company?searchPhrase={encodedPhrase}&pageSize=5&pageNumber=1";
-
             // Act
 
-            var response = await _client.GetAsync(url);
+            var response = await _client.GetAsync($"api/company?searchPhrase={encodedPhrase}&pageSize=5&pageNumber=1");
 
             // Assert
             response.StatusCode.Should().Be(HttpStatusCode.OK);

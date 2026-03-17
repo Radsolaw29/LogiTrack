@@ -7,15 +7,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LogiTrack.Tests.Services
+namespace LogiTrack.UnitTests.Validators
 {
-    public class DriverQueryValidatorTests
+    public class TruckQueryValidatorTests
     {
-        private readonly DriverQueryValidator _validator;
+        private readonly TruckQueryValidator _validator;
 
-        public DriverQueryValidatorTests()
+        public TruckQueryValidatorTests()
         {
-            _validator = new DriverQueryValidator();
+            _validator = new TruckQueryValidator();
         }
 
         [Fact]
@@ -23,7 +23,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new DriverQuery
+            var query = new TruckQuery
             {
                 PageNumber = 0,
                 PageSize = 10
@@ -44,7 +44,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new DriverQuery
+            var query = new TruckQuery
             {
                 PageNumber = 1,
                 PageSize = 10
@@ -70,7 +70,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var queru = new DriverQuery
+            var queru = new TruckQuery
             {
                 PageNumber = 1,
                 PageSize = pageSize
@@ -95,7 +95,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new DriverQuery
+            var query = new TruckQuery
             {
                 PageNumber = 1,
                 PageSize = pageSize
@@ -115,7 +115,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new DriverQuery
+            var query = new TruckQuery
             {
                 PageNumber = 1,
                 PageSize = 10,
@@ -136,7 +136,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arragne
 
-            var query = new DriverQuery
+            var query = new TruckQuery
             {
                 PageNumber = 1,
                 PageSize = 10,
@@ -153,15 +153,14 @@ namespace LogiTrack.Tests.Services
         }
 
         [Theory]
-        [InlineData("FirstName")]
-        [InlineData("LastName")]
-        [InlineData("LicenseDriving")]
-        [InlineData("ContactEmail")]
+        [InlineData("RegistrationNumber")]
+        [InlineData("Brand")]
+        [InlineData("Model")]
         public void Validate_ForValidSortBy_ShouldNotReturnsValidationError(string sortBy)
         {
             //Arrange
 
-            var query = new DriverQuery
+            var query = new TruckQuery
             {
                 PageNumber = 1,
                 PageSize = 10,
@@ -182,7 +181,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new DriverQuery
+            var query = new TruckQuery
             {
                 PageNumber = 1,
                 PageSize = 10,
@@ -196,7 +195,7 @@ namespace LogiTrack.Tests.Services
             //Assert
 
             result.ShouldHaveValidationErrorFor(x => x.SortBy)
-                .WithErrorMessage("Sort by is optional or must be in [FirstName,LastName,LicenseDriving,ContactEmail]");
+                .WithErrorMessage("Sort by is optional or must be in [RegistrationNumber,Brand,Model]");
         }
     }
 }

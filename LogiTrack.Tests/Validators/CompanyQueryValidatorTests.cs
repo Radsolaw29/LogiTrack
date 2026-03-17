@@ -1,21 +1,21 @@
-﻿using FluentValidation.TestHelper;
-using LogiTrack.Models;
+﻿using LogiTrack.Models;
 using LogiTrack.Models.Validators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FluentValidation.TestHelper;
 
-namespace LogiTrack.Tests.Services
+namespace LogiTrack.UnitTests.Validators
 {
-    public class AddressQueryValidatorTests
+    public class CompanyQueryValidatorTests
     {
-        private readonly AddressQueryValidator _validator;
+        private readonly CompanyQueryValidator _validator;
 
-        public AddressQueryValidatorTests()
+        public CompanyQueryValidatorTests()
         {
-            _validator = new AddressQueryValidator();
+            _validator = new CompanyQueryValidator();
         }
 
         [Fact]
@@ -23,7 +23,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new AddressQuery
+            var query = new CompanyQuery
             {
                 PageNumber = 0,
                 PageSize = 10
@@ -44,7 +44,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new AddressQuery
+            var query = new CompanyQuery
             {
                 PageNumber = 1,
                 PageSize = 10
@@ -70,7 +70,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var queru = new AddressQuery
+            var queru = new CompanyQuery
             {
                 PageNumber = 1,
                 PageSize = pageSize
@@ -83,7 +83,7 @@ namespace LogiTrack.Tests.Services
             //Assert
 
             result.ShouldHaveValidationErrorFor(x => x.PageSize)
-                .WithErrorMessage("Page size must be in [5,10,20,50]");
+                .WithErrorMessage("PageSize must be in [5,10,20,50]");
         }
 
         [Theory]
@@ -95,7 +95,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new AddressQuery
+            var query = new CompanyQuery
             {
                 PageNumber = 1,
                 PageSize = pageSize
@@ -115,7 +115,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new AddressQuery
+            var query = new CompanyQuery
             {
                 PageNumber = 1,
                 PageSize = 10,
@@ -136,7 +136,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arragne
 
-            var query = new AddressQuery
+            var query = new CompanyQuery
             {
                 PageNumber = 1,
                 PageSize = 10,
@@ -153,16 +153,16 @@ namespace LogiTrack.Tests.Services
         }
 
         [Theory]
-        [InlineData("Country")]
-        [InlineData("City")]
-        [InlineData("Street")]
+        [InlineData("Name")]
+        [InlineData("Description")]
+        [InlineData("ContactEmail")]
         public void Validate_ForValidSortBy_ShouldNotReturnsValidationError(string sortBy)
         {
             //Arrange
 
-            var query = new AddressQuery
+            var query = new CompanyQuery
             {
-                PageNumber = 1,
+                PageNumber= 1,
                 PageSize = 10,
                 SortBy = sortBy
             };
@@ -181,7 +181,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var query = new AddressQuery
+            var query = new CompanyQuery
             {
                 PageNumber = 1,
                 PageSize = 10,
@@ -195,7 +195,7 @@ namespace LogiTrack.Tests.Services
             //Assert
 
             result.ShouldHaveValidationErrorFor(x => x.SortBy)
-                .WithErrorMessage("Sort by is optional, or must be in [Country,City,Street]");
+                .WithErrorMessage("Sort by is optional, or must be in [Name,Description,ContactEmail]");
         }
     }
 }

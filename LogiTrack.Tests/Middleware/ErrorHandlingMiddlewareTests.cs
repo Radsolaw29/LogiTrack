@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LogiTrack.Tests.Services
+namespace LogiTrack.UnitTests.Middleware
 {
     public class ErrorHandlingMiddlewareTests
     {

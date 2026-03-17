@@ -9,19 +9,19 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LogiTrack.Tests.Services
+namespace LogiTrack.UnitTests.Handlers
 {
-    public class DriverResourceOperationRequirementHandlerTests
+    public class AddressResourceOperationRequirementHandlerTests
     {
 
-        private readonly DriverResourceOperationRequirementHandler _handler;
+        private readonly AddressResourceOperationRequirementHandler _handler;
 
-        public DriverResourceOperationRequirementHandlerTests()
+        public AddressResourceOperationRequirementHandlerTests()
         {
-            _handler = new DriverResourceOperationRequirementHandler();
+            _handler = new AddressResourceOperationRequirementHandler();
         }
 
-        private static AuthorizationHandlerContext CreateContext(ResourceOperation resourceOperation, Driver driver, int userId)
+        private static AuthorizationHandlerContext CreateContext(ResourceOperation resourceOperation, Address address, int userId)
         {
             var requirement = new ResourcerceOperationRequirement(resourceOperation);
 
@@ -33,7 +33,7 @@ namespace LogiTrack.Tests.Services
             return new AuthorizationHandlerContext(
                 new[] { requirement },
                 user,
-                driver);
+                address);
         }
 
         [Theory]
@@ -43,9 +43,9 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var driver = new Driver { CreatedById = 999 };
+            var address = new Address { CreatedById = 999 };
 
-            var context = CreateContext(resourceOperation, driver, userId: 1);
+            var context = CreateContext(resourceOperation, address, userId: 1);
 
             //Act
 
@@ -62,9 +62,9 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var driver = new Driver { CreatedById = 999 };
+            var address = new Address { CreatedById = 999 };
 
-            var context = CreateContext(ResourceOperation.Update, driver, userId: 999);
+            var context = CreateContext(ResourceOperation.Update, address, userId: 999);
 
             //Act
 
@@ -81,9 +81,9 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var driver = new Driver { CreatedById = 999 };
+            var address = new Address { CreatedById = 999 };
 
-            var context = CreateContext(ResourceOperation.Delete, driver, userId: 1);
+            var context = CreateContext(ResourceOperation.Delete, address, userId: 1);
 
             //Act
 

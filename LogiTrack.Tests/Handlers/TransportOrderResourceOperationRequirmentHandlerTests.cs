@@ -9,19 +9,19 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LogiTrack.Tests.Services
+namespace LogiTrack.UnitTests.Handlers
 {
-    public class ResourcerceOperationRequirementHandlerTests
+    public class TransportOrderResourceOperationRequirmentHandlerTests
     {
 
-        private readonly ResourcerceOperationRequirementHandler _handler;
+        private readonly TransportOrderResourceOperationRequirmentHandler _handler;
 
-        public ResourcerceOperationRequirementHandlerTests()
+        public TransportOrderResourceOperationRequirmentHandlerTests()
         {
-            _handler = new ResourcerceOperationRequirementHandler();
+            _handler = new TransportOrderResourceOperationRequirmentHandler();
         }
 
-        private static AuthorizationHandlerContext CreateContext(ResourceOperation resourceOperation, Company company, int userId)
+        private static AuthorizationHandlerContext CreateContext(ResourceOperation resourceOperation, TransportOrder transportOrder, int userId)
         {
             var requirement = new ResourcerceOperationRequirement(resourceOperation);
 
@@ -33,7 +33,7 @@ namespace LogiTrack.Tests.Services
             return new AuthorizationHandlerContext(
                 new[] { requirement },
                 user,
-                company);
+                transportOrder);
         }
 
         [Theory]
@@ -43,9 +43,9 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var company = new Company { CreatedById = 999 };
+            var transpoerOrder = new TransportOrder { CreatedById = 999 };
 
-            var context = CreateContext(resourceOperation, company, userId: 1);
+            var context = CreateContext(resourceOperation, transpoerOrder, userId: 1);
 
             //Act
 
@@ -62,9 +62,9 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var company = new Company { CreatedById = 999 };
+            var transportOrder = new TransportOrder { CreatedById = 999 };
 
-            var context = CreateContext(ResourceOperation.Update, company, userId: 999);
+            var context = CreateContext(ResourceOperation.Update, transportOrder, userId: 999);
 
             //Act
 
@@ -81,9 +81,9 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var company = new Company { CreatedById = 999 };
+            var transportOrder = new TransportOrder { CreatedById = 999 };
 
-            var context = CreateContext(ResourceOperation.Delete, company, userId: 1);
+            var context = CreateContext(ResourceOperation.Delete, transportOrder, userId: 1);
 
             //Act
 
