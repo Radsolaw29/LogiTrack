@@ -15,10 +15,10 @@ namespace LogiTrack.Models
         public string PersonalNumber { get; set; } = string.Empty;
         public DateTime DateOfBirth { get; set; }
         public string LicenseDriving { get; set; } = string.Empty;
-        public int PhoneNumber { get; set; }
+        public int? PhoneNumber { get; set; }
         public string ContactEmail { get; set; } = string.Empty;
 
         [Required]
-        public int CompanyId { get; set; }
+        public int? CompanyId { get; set; }
     }
 }
