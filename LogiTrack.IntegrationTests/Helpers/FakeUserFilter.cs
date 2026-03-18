@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using System.Security.Claims;
 
-namespace LogiTrack.IntegrationTests
+namespace LogiTrack.IntegrationTests.Helpers
 {
     public class FakeUserFilter : IAsyncActionFilter
     {

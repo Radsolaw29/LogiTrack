@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.Identity.Client;
 using System.Security.Claims;
 
-namespace LogiTrack.IntegrationTests
+namespace LogiTrack.IntegrationTests.Helpers
 {
     public class FakePolicyEvaluator : IPolicyEvaluator
     {

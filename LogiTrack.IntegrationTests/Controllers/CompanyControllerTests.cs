@@ -1,8 +1,8 @@
 ﻿using FluentAssertions;
 using LogiTrack.Entities;
+using LogiTrack.IntegrationTests.Builders;
 using LogiTrack.IntegrationTests.Extensions;
 using LogiTrack.IntegrationTests.Helpers;
-using LogiTrack.IntegrationTests.Seed;
 using LogiTrack.Models;
 using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Mvc;
@@ -98,8 +98,7 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            await TestDbSeeder.ResetDatabase(_factory);
-            await TestDbSeeder.SeedBasicCompanies(_factory);
+            await SeedBasicData.SeedCompanyAsync(_factory);
 
             var encodedPhrase = Uri.EscapeDataString(searchPhrase);
 
@@ -111,8 +110,7 @@ namespace LogiTrack.IntegrationTests.Controllers
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var content = await response.Content.ReadAsStringAsync();
-            var result = JsonConvert.DeserializeObject<PageResult<CompanyDto>>(content);
+            var result = await response.DeserializeAsync<PageResult<CompanyDto>>();
             result.Items.Should().NotBeNull();
             result.Items.Should().NotBeEmpty();
 
@@ -129,8 +127,7 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             // Arrange
 
-            await TestDbSeeder.ResetDatabase(_factory);
-            await TestDbSeeder.SeedBasicCompanies(_factory);
+            await SeedBasicData.SeedCompanyAsync(_factory);
 
             var encodedPhrase = Uri.EscapeDataString(searchPhrase);
 
@@ -139,10 +136,10 @@ namespace LogiTrack.IntegrationTests.Controllers
             var response = await _client.GetAsync($"api/company?searchPhrase={encodedPhrase}&pageSize=5&pageNumber=1");
 
             // Assert
+
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            var content = await response.Content.ReadAsStringAsync();
-            var result = JsonConvert.DeserializeObject<PageResult<CompanyDto>>(content);
+            var result = await response.DeserializeAsync<PageResult<CompanyDto>>();
 
             result.Should().NotBeNull();
             result.Items.Should().NotBeNull();
@@ -156,8 +153,7 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             // Arrange
 
-            await TestDbSeeder.ResetDatabase(_factory);
-            await TestDbSeeder.SeedBasicCompanies(_factory);
+            await SeedBasicData.SeedCompanyAsync(_factory);
 
             // Act
 
@@ -169,7 +165,7 @@ namespace LogiTrack.IntegrationTests.Controllers
 
             response.StatusCode.Should().Be(HttpStatusCode.OK, content);
 
-            var result = JsonConvert.DeserializeObject<PageResult<CompanyDto>>(content);
+            var result = await response.DeserializeAsync<PageResult<CompanyDto>>();
 
             result.Should().NotBeNull();
             result.Items.Should().HaveCount(3);
@@ -190,8 +186,7 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             // Arrange
 
-            await TestDbSeeder.ResetDatabase(_factory);
-            await TestDbSeeder.SeedBasicCompanies(_factory);
+            await SeedBasicData.SeedCompanyAsync(_factory);
 
             // Act
 
@@ -203,7 +198,7 @@ namespace LogiTrack.IntegrationTests.Controllers
 
             response.StatusCode.Should().Be(HttpStatusCode.OK, content);
 
-            var result = JsonConvert.DeserializeObject<PageResult<CompanyDto>>(content);
+            var result = await response.DeserializeAsync<PageResult<CompanyDto>>();
 
             result.Items.Should().HaveCount(3);
 
@@ -292,8 +287,7 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            await TestDbSeeder.ResetDatabase(_factory);
-            await TestDbSeeder.SeedBasicCompanies(_factory);
+            await SeedBasicData.SeedCompanyAsync(_factory);
 
             var unauthorizedClient = _factory.CreateUnauthorizedClient();
 
@@ -310,25 +304,12 @@ namespace LogiTrack.IntegrationTests.Controllers
         public async Task CreateCompany_WithValidModel_ShouldReturnsCreated()
         {
             //Arrange
-
-            var dto = new CreateCompanyDto()
-            {
-                Name = "CompanyTest123",
-                Description = "Description Test123",
-                TaxNumber = 1235469877,
-                PhoneNumber = 111222333,
-                ContactEmail = "testcompany@wp.pl",
-                Country = "Poland",
-                City = "Sopot",
-                Street = "Łokietka 17c/1",
-                PostalCode = "12345"
-            };
-
-            var httpContent = dto.ToJsonHttpContent();
+            
+            var dto = new CreateCompanyBuilder().Build();
 
             //Act
 
-            var response = await _client.PostAsync("api/company", httpContent);
+            var response = await _client.PostAsync("api/company", dto.ToJsonHttpContent());
 
             //Assert
 
@@ -343,9 +324,7 @@ namespace LogiTrack.IntegrationTests.Controllers
 
             var dto = new CreateCompanyDto()
             {
-                Description = "Test decription",
-                PhoneNumber = 111222333,
-                ContactEmail = "test@test.pl"
+                Description = "Test decription"
             };
 
             var httpContent = dto.ToJsonHttpContent();
@@ -371,18 +350,7 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            var dto = new CreateCompanyDto()
-            {
-                Name = "Test company - NoAdmin",
-                Description = "Test description",
-                TaxNumber = 111222333,
-                PhoneNumber = 444555667,
-                ContactEmail = "test@test.pl",
-                Country = "Poland",
-                City = "Sopot",
-                Street = "Pańska 7",
-                PostalCode = "70-874"
-            };
+            var dto = new CreateCompanyBuilder().Build();
 
             var client = _factory.CreateClientWithRole("User");
 
@@ -416,29 +384,13 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            var company = new Company
-            {
-                Name = "Test company name 123",
-                Description = "Test description",
-                TaxNumber = 123654123,
-                PhoneNumber = 555444777,
-                ContactEmail = "test@wp.pl",
-                CreatedById = 1
-            };
+            await SeedBasicData.SeedCompanyAsync(_factory);
 
-            SeedCompany(company);
-
-            var dto = new UpdateCompanyDto
-            {
-                Name = "Test company update",
-                Description = "Test description",
-                TaxNumber = 111111111,
-                ContactEmail = "testupdate@wp.pl"
-            };
+            var dto = new UpdateCompanyBuilder().Build();
 
             //Act
 
-            var response = await _client.PutAsync($"api/company/{company.Id}", dto.ToJsonHttpContent());
+            var response = await _client.PutAsync($"api/company/1", dto.ToJsonHttpContent());
 
             //Assert
 
@@ -446,7 +398,7 @@ namespace LogiTrack.IntegrationTests.Controllers
 
             using var scope = _factory.Services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<LogiTrackDbContext>();
-            var updatedCompany = await dbContext.Companies.FirstOrDefaultAsync(c => c.Id == company.Id);
+            var updatedCompany = await dbContext.Companies.FirstOrDefaultAsync(c => c.Id == 1);
 
             updatedCompany.Should().NotBeNull();
             updatedCompany.Name.Should().Be(dto.Name);
@@ -460,13 +412,7 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            var company = new Company
-            {
-                CreatedById = 1,
-                Description = "Test desctription"
-            };
-
-            SeedCompany(company);
+            await SeedBasicData.SeedCompanyAsync(_factory);
 
             var dto = new UpdateCompanyDto
             {
@@ -475,7 +421,7 @@ namespace LogiTrack.IntegrationTests.Controllers
 
             //Act
 
-            var response = await _client.PutAsync($"api/company/{company.Id}", dto.ToJsonHttpContent());
+            var response = await _client.PutAsync($"api/company/1", dto.ToJsonHttpContent());
 
             //Assert
 
@@ -487,10 +433,7 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            var dto = new UpdateCompanyDto
-            {
-                Name = "test company name"
-            };
+            var dto = new UpdateCompanyBuilder().Build();
 
             //Act
 
@@ -506,24 +449,15 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            var company = new Company
-            {
-                CreatedById = 1,
-                Name = "Test company name"
-            };
+            await SeedBasicData.SeedCompanyAsync(_factory);
 
-            SeedCompany(company);
-
-            var dto = new UpdateCompanyDto
-            {
-                Name = "update company name"
-            };
+            var dto = new UpdateCompanyBuilder().Build();
 
             var client = _factory.CreateClientWithRole("User");
 
             //Act
 
-            var response = await client.PutAsync($"api/company/{company.Id}", dto.ToJsonHttpContent());
+            var response = await client.PutAsync($"api/company/1", dto.ToJsonHttpContent());
 
             //Assert
 
@@ -535,24 +469,15 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            var company = new Company
-            {
-                CreatedById = 1,
-                Name = "Test company name"
-            };
+            await SeedBasicData.SeedCompanyAsync(_factory);
 
-            SeedCompany(company);
-
-            var dto = new UpdateCompanyDto
-            {
-                Name = "New company name"
-            };
+            var dto = new UpdateCompanyBuilder().Build();
 
             var unauthorizedClient = _factory.CreateUnauthorizedClient();
 
             //Act
 
-            var response = await unauthorizedClient.PutAsync($"api/company/{company.Id}", dto.ToJsonHttpContent());
+            var response = await unauthorizedClient.PutAsync($"api/company/1", dto.ToJsonHttpContent());
 
             //Assert
 
@@ -564,17 +489,11 @@ namespace LogiTrack.IntegrationTests.Controllers
         {
             //Arrange
 
-            var company = new Company
-            {
-                CreatedById = 1,
-                Name = "Test company name"
-            };
-
-            SeedCompany(company);
+            await SeedBasicData.SeedCompanyAsync(_factory);
 
             //Act
 
-            var response = await _client.DeleteAsync($"api/company/{company.Id}");
+            var response = await _client.DeleteAsync($"api/company/1");
 
             //Assert
 
