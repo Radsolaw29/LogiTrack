@@ -7,7 +7,6 @@ using LogiTrack.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using System.Security.Claims;
 
 namespace LogiTrack.Services
 {
@@ -142,6 +141,5 @@ namespace LogiTrack.Services
             _dbContext.Companies.Remove(company);
             _dbContext.SaveChanges();
         }
-
     }
 }

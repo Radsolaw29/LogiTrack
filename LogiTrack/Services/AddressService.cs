@@ -5,7 +5,6 @@ using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.IdentityModel.Tokens;
 using System.Linq.Expressions;
 
 namespace LogiTrack.Services
@@ -66,7 +65,6 @@ namespace LogiTrack.Services
                     ? baseQuery.OrderBy(selectedColumn)
                     : baseQuery.OrderByDescending(selectedColumn);
             }
-
 
             var addresses = baseQuery
                 .Skip(query.PageSize * (query.PageNumber - 1))
@@ -136,6 +134,5 @@ namespace LogiTrack.Services
             _dbContext.Addresses.Remove(address);
             _dbContext.SaveChanges();
         }
-
     }
 }

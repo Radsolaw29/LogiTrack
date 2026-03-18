@@ -17,6 +17,5 @@
 
         public virtual Company Company { get; set; }
         public virtual List<TransportOrder> TransportOrders { get; set; } = new();
-
     }
 }

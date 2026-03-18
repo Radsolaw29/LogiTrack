@@ -30,6 +30,5 @@ namespace LogiTrack.Controllers
 
             return Ok(token);
         }
-
     }
 }

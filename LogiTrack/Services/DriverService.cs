@@ -6,7 +6,6 @@ using LogiTrack.Interfaces;
 using LogiTrack.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using System.Linq.Expressions;
 
 namespace LogiTrack.Services

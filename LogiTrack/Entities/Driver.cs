@@ -2,7 +2,6 @@
 {
     public class Driver
     {
-
         public int Id { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
@@ -19,6 +18,5 @@
         public virtual Company Company { get; set; }
 
         public virtual List<TransportOrder> TransportOrders { get; set; } = new();
-
     }
 }

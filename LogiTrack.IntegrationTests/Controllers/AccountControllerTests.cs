@@ -3,11 +3,9 @@ using LogiTrack.Entities;
 using LogiTrack.IntegrationTests.Helpers;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
-using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using NLog.Config;
 using System.Net;
 
 namespace LogiTrack.IntegrationTests.Controllers
@@ -56,11 +54,9 @@ namespace LogiTrack.IntegrationTests.Controllers
                 ConfirmPassword = "password12!"
             };
 
-            var httpContent = registerUser.ToJsonHttpContent();
-
             //Act
 
-            var response = await _client.PostAsync("/api/account/register", httpContent);
+            var response = await _client.PostAsync("/api/account/register", registerUser.ToJsonHttpContent());
 
             //Assert
 
@@ -78,17 +74,14 @@ namespace LogiTrack.IntegrationTests.Controllers
                 ConfirmPassword = "password1!"
             };
 
-            var httpContent = registerUser.ToJsonHttpContent();
-
             //Act
 
-            var response = await _client.PostAsync("/api/account/register", httpContent);
+            var response = await _client.PostAsync("/api/account/register", registerUser.ToJsonHttpContent());
 
             //Assert
 
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
-
 
         [Fact]
         public async Task LoginUser_ForRegisteredUser_ShouldReturnsOk()
@@ -104,11 +97,9 @@ namespace LogiTrack.IntegrationTests.Controllers
                 Password = "Password12!"
             };
 
-            var httpContent = loginDto.ToJsonHttpContent();
-
             //Act
 
-            var response = await _client.PostAsync("/api/account/login", httpContent);
+            var response = await _client.PostAsync("/api/account/login", loginDto.ToJsonHttpContent());
 
             //Assert
 

@@ -17,6 +17,5 @@
         public virtual List<TransportOrder> TransportOrders { get; set; } = new();
         public virtual List<Driver> Drivers { get; set; } = new();
         public virtual List<Truck> Trucks { get; set; } = new();
-
     }
 }

@@ -1,5 +1,4 @@
-﻿
-using LogiTrack.Exceptions;
+﻿using LogiTrack.Exceptions;
 
 namespace LogiTrack.Middleware
 {

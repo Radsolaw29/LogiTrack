@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using LogiTrack.Entities;
-using LogiTrack.Interfaces;
+﻿using LogiTrack.Interfaces;
 using LogiTrack.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

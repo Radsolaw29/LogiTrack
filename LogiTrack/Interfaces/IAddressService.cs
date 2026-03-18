@@ -1,5 +1,4 @@
 ﻿using LogiTrack.Models;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace LogiTrack.Interfaces
 {

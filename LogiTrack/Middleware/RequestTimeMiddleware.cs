@@ -1,5 +1,4 @@
-﻿
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace LogiTrack.Middleware
 {
@@ -12,7 +11,6 @@ namespace LogiTrack.Middleware
         {
             _logger = logger;
             _stopWatch = new Stopwatch();
-            
         }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)

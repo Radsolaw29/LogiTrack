@@ -6,7 +6,6 @@ namespace LogiTrack
 {
     public class LogiTrackMappingProfile : Profile
     {
-
         public LogiTrackMappingProfile()
         {
             CreateMap<Company, CompanyDto>()
