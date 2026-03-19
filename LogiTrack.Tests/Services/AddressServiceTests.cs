@@ -1,21 +1,18 @@
 ﻿using AutoMapper;
-using Castle.Core.Logging;
 using FluentAssertions;
 using LogiTrack.Entities;
 using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
 using LogiTrack.Services;
+using LogiTrack.UnitTests.Builders;
+using LogiTrack.UnitTests.Helpers;
+using LogiTrack.UnitTests.TestData;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LogiTrack.Tests.Services
 {
@@ -56,55 +53,6 @@ namespace LogiTrack.Tests.Services
             _sut = new AddressService(_dbContext, _mapper, loggerMock.Object, _authorizationServiceMock.Object, _userContextServiceMock.Object);
         }
 
-        private void SeedAddress()
-        {
-            var addresses = new List<Address>
-            {
-                new Address
-                {
-                    Id = 1,
-                    Country = "Poland",
-                    City = "Sopot",
-                    Street = "Aleja Zwycięstwa 115",
-                    PostalCode = "12345",
-                    CreatedById = 1
-                },
-
-                new Address
-                {
-                    Id = 2,
-                    Country = "England",
-                    City = "London",
-                    Street = "Oxford Street 15",
-                    PostalCode = "55777",
-                    CreatedById = 2
-                },
-
-                new Address
-                {
-                    Id = 3,
-                    Country = "Sweeden",
-                    City = "Stockholm",
-                    Street = "Drottninggatan 22",
-                    PostalCode = "11111",
-                    CreatedById = 3
-                },
-
-                new Address
-                {
-                    Id = 4,
-                    Country = "Sweeden",
-                    City = "Stockholm",
-                    Street = "Karls 74",
-                    PostalCode = "11114",
-                    CreatedById = 4
-                }
-            };
-
-            _dbContext.Addresses.AddRange(addresses);
-            _dbContext.SaveChanges();
-        }
-
         [Theory]
         [InlineData("Sweeden", 2)]
         [InlineData("England", 1)]
@@ -122,7 +70,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            SeedAddress();
+            AddressSeeder.SeedAddress(_dbContext);
 
             var query = new AddressQuery
             {
@@ -145,13 +93,13 @@ namespace LogiTrack.Tests.Services
         [InlineData(nameof(Address.Country), SortDirection.DESC, "Sweeden")]
         [InlineData(nameof(Address.City), SortDirection.ASC, "London")]
         [InlineData(nameof(Address.City), SortDirection.DESC, "Stockholm")]
-        [InlineData(nameof(Address.Street), SortDirection.ASC, "Aleja Zwycięstwa 115")]
+        [InlineData(nameof(Address.Street), SortDirection.ASC, "ADrottninggatan 22")]
         [InlineData(nameof(Address.Street), SortDirection.DESC, "Oxford Street 15")]
         public void GetAll_WithSorting_Returns_SortedResults(string sortBy, SortDirection direction, string expectedFirstValue)
         {
             //Arrange
 
-            SeedAddress();
+            AddressSeeder.SeedAddress(_dbContext);
 
             var query = new AddressQuery
             {
@@ -180,15 +128,15 @@ namespace LogiTrack.Tests.Services
         }
 
         [Theory]
-        [InlineData(1, 1, "Aleja Zwycięstwa 115")]
-        [InlineData(2, 1, "Drottninggatan 22")]
+        [InlineData(1, 1, "ADrottninggatan 22")]
+        [InlineData(2, 1, "Aleja Zwycięstwa 115")]
         [InlineData(3, 1, "Karls 74")]
         [InlineData(4, 1, "Oxford Street 15")]
         public void GetAll_WithPagination_ReturnsCorrectPage(int pageNumber, int pageSize, string expectedFirstStreet)
         {
             //Arrange
 
-            SeedAddress();
+            AddressSeeder.SeedAddress(_dbContext);
 
             var query = new AddressQuery
             {
@@ -214,7 +162,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            SeedAddress();
+            AddressSeeder.SeedAddress(_dbContext);
 
             //Act
 
@@ -243,13 +191,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var dto = new CreateAddressDto
-            {
-                Country = "Portugal",
-                City = "Lizbona",
-                Street = "Polna 147",
-                PostalCode = "12345"
-            };
+            var dto = new CreateAddressBuilder().Build();
 
             //Act
 
@@ -277,13 +219,7 @@ namespace LogiTrack.Tests.Services
             var expectedUserId = 999;
             _userContextServiceMock.Setup(x => x.GetUserId).Returns(expectedUserId);
 
-            var dto = new CreateAddressDto
-            {
-                Country = "Portugal",
-                City = "Lizbona",
-                Street = "Polna 147",
-                PostalCode = "12345"
-            };
+            var dto = new CreateAddressBuilder().Build();
 
             //Act
 
@@ -302,22 +238,11 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            SeedAddress();
+            AddressSeeder.SeedAddress(_dbContext);
 
-            var dto = new UpdateAddressDto
-            {
-                Country = "Portugal",
-                City = "Lizbona",
-                Street = "Polna 147",
-                PostalCode = "12345"
-            };
+            var dto = new UpdateAddressBuilder().Build();
 
-            _authorizationServiceMock
-                .Setup(x => x.AuthorizeAsync(
-                    It.IsAny<ClaimsPrincipal>(),
-                    It.IsAny<object>(),
-                    It.IsAny<IEnumerable<IAuthorizationRequirement>>()))
-                .ReturnsAsync(AuthorizationResult.Success);
+            _authorizationServiceMock.SetupSuccess();
 
             //Act
 
@@ -338,22 +263,11 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            SeedAddress();
+            AddressSeeder.SeedAddress(_dbContext);
 
-            var dto = new UpdateAddressDto
-            {
-                Country = "Portugal",
-                City = "Lizbona",
-                Street = "Polna 147",
-                PostalCode = "12345"
-            };
+            var dto = new UpdateAddressBuilder().Build();
 
-            _authorizationServiceMock
-                .Setup(x => x.AuthorizeAsync(
-                    It.IsAny<ClaimsPrincipal>(),
-                    It.IsAny<object>(),
-                    It.IsAny<IEnumerable<IAuthorizationRequirement>>()))
-                .ReturnsAsync(AuthorizationResult.Failed);
+            _authorizationServiceMock.SetupFail();
 
             //Act
 
@@ -369,13 +283,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var dto = new UpdateAddressDto
-            {
-                Country = "Portugal",
-                City = "Lizbona",
-                Street = "Polna 147",
-                PostalCode = "12345"
-            };
+            var dto = new UpdateAddressBuilder().Build();
 
             //Act
 
@@ -391,14 +299,9 @@ namespace LogiTrack.Tests.Services
         {
             //Arrnge
 
-            SeedAddress();
+            AddressSeeder.SeedAddress(_dbContext);
 
-            _authorizationServiceMock
-                .Setup(x => x.AuthorizeAsync(
-                    It.IsAny<ClaimsPrincipal>(),
-                    It.IsAny<object>(),
-                    It.IsAny<IEnumerable<IAuthorizationRequirement>>()))
-                .ReturnsAsync(AuthorizationResult.Success);
+            _authorizationServiceMock.SetupSuccess();
 
             //Act
 
@@ -417,14 +320,9 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            SeedAddress();
+            AddressSeeder.SeedAddress(_dbContext);
 
-            _authorizationServiceMock
-                .Setup(x => x.AuthorizeAsync(
-                    It.IsAny<ClaimsPrincipal>(),
-                    It.IsAny<object>(),
-                    It.IsAny<IEnumerable<IAuthorizationRequirement>>()))
-                .ReturnsAsync(AuthorizationResult.Failed);
+            _authorizationServiceMock.SetupFail();
 
             //Act
 

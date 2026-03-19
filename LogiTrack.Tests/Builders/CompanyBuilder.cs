@@ -72,9 +72,6 @@ namespace LogiTrack.UnitTests.Builders
             return this;
         }
 
-        public Company Build()
-        {
-            return _company;
-        }
+        public Company Build() => _company;
     }
 }
