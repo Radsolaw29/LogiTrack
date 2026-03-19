@@ -28,10 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Builders\" />
     <Folder Include="Fixtures\" />
-    <Folder Include="Helpers\" />
-    <Folder Include="TestData\" />
   </ItemGroup>
 
 </Project>

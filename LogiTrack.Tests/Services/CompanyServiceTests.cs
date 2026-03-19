@@ -5,16 +5,14 @@ using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
 using LogiTrack.Services;
+using LogiTrack.UnitTests.Builders;
+using LogiTrack.UnitTests.Helpers;
+using LogiTrack.UnitTests.TestData;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LogiTrack.Tests.Services
 {
@@ -62,84 +60,6 @@ namespace LogiTrack.Tests.Services
             _sut = new CompanyService(_dbContext, _mapper, loggerMock.Object, _authorizationServiceMock.Object, _userContextServiceMock.Object);
         }
 
-        private void SeedCompany()
-        {
-            var companies = new List<Company>
-            {
-                new Company
-                {
-                    Id = 1,
-                    Name = "Eagle Trans",
-                    Description = "A transport company serving all of Europe.",
-                    TaxNumber = 123456789,
-                    PhoneNumber = 123456789,
-                    ContactEmail = "transport@wp.pl",
-
-                    Address = new Address()
-                    {
-                        Id = 1,
-                        Country = "Poland",
-                        City = "Warszawa",
-                        Street = "Marszałkowska 1",
-                        PostalCode = "00-101"
-                    },
-
-                    Trucks = new List<Truck>(),
-                    Drivers = new List<Driver>(),
-                    TransportOrders = new List<TransportOrder>()
-                },
-
-                new Company
-                {
-                    Id = 2,
-                    Name = "Nordic Logistics",
-                    Description = "Scandinavian transport services.",
-                    TaxNumber = 987654321,
-                    PhoneNumber = 987654321,
-                    ContactEmail = "contact@nordic.com",
-
-                    Address = new Address()
-                    {
-                        Id = 2,
-                        Country = "Sweden",
-                        City = "Stockholm",
-                        Street = "Sveavägen 10",
-                        PostalCode = "111 57"
-                    },
-
-                    Trucks = new List<Truck>(),
-                    Drivers = new List<Driver>(),
-                    TransportOrders = new List<TransportOrder>()
-                },
-
-                new Company
-                {
-                    Id = 3,
-                    Name = "Norway Logistics",
-                    Description = "Scandinavian transport services.",
-                    TaxNumber = 987654333,
-                    PhoneNumber = 987654333,
-                    ContactEmail = "norway@nordic.com",
-
-                    Address = new Address()
-                    {
-                        Id = 3,
-                        Country = "Norway",
-                        City = "Oslo",
-                        Street = "Karl Johans gate 15",
-                        PostalCode = "100 01"
-                    },
-
-                    Trucks = new List<Truck>(),
-                    Drivers = new List<Driver>(),
-                    TransportOrders = new List<TransportOrder>()
-                }
-            };
-
-            _dbContext.Companies.AddRange(companies);
-            _dbContext.SaveChanges();
-        }
-
         [Theory]
         [InlineData("Eagle Trans", 1)]
         [InlineData("Nordic Logistics", 1)]
@@ -150,7 +70,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            SeedCompany();
+            CompanySeeder.SeedCompanies(_dbContext);
 
             var query = new CompanyQuery
             {
@@ -179,7 +99,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            SeedCompany();
+            CompanySeeder.SeedCompanies(_dbContext);
 
             var query = new CompanyQuery
             {
@@ -214,7 +134,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            SeedCompany();
+            CompanySeeder.SeedCompanies(_dbContext);
 
             var query = new CompanyQuery
             {
@@ -240,7 +160,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            SeedCompany();
+            CompanySeeder.SeedCompanies(_dbContext);
 
             //Act
 
@@ -269,18 +189,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var dto = new CreateCompanyDto
-            {
-                Name = "Eagle Trans",
-                Description = "A transport company serving all of Europe.",
-                TaxNumber = 123456789,
-                PhoneNumber = 123456789,
-                ContactEmail = "transport@wp.pl",
-                Country = "Poland",
-                City = "Warszawa",
-                Street = "Grunwaldzka 11",
-                PostalCode = "00-762"
-            };
+            var dto = new CreateCompanyBuilder().Build();
 
             //Act
 
@@ -316,18 +225,7 @@ namespace LogiTrack.Tests.Services
             var expectedUserId = 999;
             _userContextServiceMock.Setup(x => x.GetUserId).Returns(expectedUserId);
 
-            var dto = new CreateCompanyDto
-            {
-                Name = "Eagle -POL- Trans",
-                Description = "A transport company serving all of Europe.",
-                TaxNumber = 123456777,
-                PhoneNumber = 123456777,
-                ContactEmail = "transportPOL@wp.pl",
-                Country = "Poland",
-                City = "Warszawa",
-                Street = "Grunwaldzka 17",
-                PostalCode = "00-763"
-            };
+            var dto = new CreateCompanyBuilder().Build();
 
             //Act
 
@@ -346,22 +244,11 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            SeedCompany();
+            CompanySeeder.SeedCompanies(_dbContext);
 
-            var dto = new UpdateCompanyDto
-            {
-                Name = "EagleTrans",
-                Description = "A transport company serving all of Europe.Edit",
-                ContactEmail = "transport@wp.pl",
-                TaxNumber = 111111111
-            };
+            var dto = new UpdateCompanyBuilder().Build();
 
-            _authorizationServiceMock
-                .Setup(x => x.AuthorizeAsync(
-                    It.IsAny<ClaimsPrincipal>(),
-                    It.IsAny<object>(),
-                    It.IsAny<IEnumerable<IAuthorizationRequirement>>()))
-                .ReturnsAsync(AuthorizationResult.Success);
+            _authorizationServiceMock.SetupSuccess();
 
             //Act
 
@@ -382,22 +269,11 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            SeedCompany();
+            CompanySeeder.SeedCompanies(_dbContext);
 
-            var dto = new UpdateCompanyDto
-            {
-                Name = "EagleTrans1",
-                Description = "A transport company serving all of Europe.Edit2",
-                ContactEmail = "transport1@wp.pl",
-                TaxNumber = 111111112
-            };
+            var dto = new UpdateCompanyBuilder().Build();
 
-            _authorizationServiceMock.
-                Setup(x => x.AuthorizeAsync(
-                    It.IsAny<ClaimsPrincipal>(),
-                    It.IsAny<object>(),
-                    It.IsAny<IEnumerable<IAuthorizationRequirement>>()))
-                .ReturnsAsync(AuthorizationResult.Failed);
+            _authorizationServiceMock.SetupFail();
 
             //Act
 
@@ -413,13 +289,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var dto = new UpdateCompanyDto
-            {
-                Name = "EagleTrans1",
-                Description = "A transport company serving all of Europe.Edit2",
-                ContactEmail = "transport1@wp.pl",
-                TaxNumber = 111111112
-            };
+            var dto = new UpdateCompanyBuilder().Build();
 
             //Act
 
@@ -435,14 +305,9 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            SeedCompany();
+            CompanySeeder.SeedCompanies(_dbContext);
 
-            _authorizationServiceMock
-                .Setup(x => x.AuthorizeAsync(
-                    It.IsAny<ClaimsPrincipal>(),
-                    It.IsAny<object>(),
-                    It.IsAny<IEnumerable<IAuthorizationRequirement>>()))
-                .ReturnsAsync(AuthorizationResult.Success);
+            _authorizationServiceMock.SetupSuccess();
 
             //Act
 
@@ -461,14 +326,9 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            SeedCompany();
+            CompanySeeder.SeedCompanies(_dbContext);
 
-            _authorizationServiceMock
-                .Setup(x => x.AuthorizeAsync(
-                    It.IsAny<ClaimsPrincipal>(),
-                    It.IsAny<object>(),
-                    It.IsAny<IEnumerable<IAuthorizationRequirement>>()))
-                .ReturnsAsync(AuthorizationResult.Failed);
+            _authorizationServiceMock.SetupFail();
 
             //Act
 
