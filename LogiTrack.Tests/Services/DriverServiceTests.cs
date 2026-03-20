@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
-using Castle.Core.Logging;
 using FluentAssertions;
 using LogiTrack.Entities;
 using LogiTrack.Exceptions;
 using LogiTrack.Interfaces;
 using LogiTrack.Models;
 using LogiTrack.Services;
+using LogiTrack.UnitTests.Builders;
+using LogiTrack.UnitTests.Helpers;
+using LogiTrack.UnitTests.TestData;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -51,69 +53,103 @@ namespace LogiTrack.Tests.Services
             _sut = new DriverService(_dbContext, _mapper, loggerMock.Object, _authorizationServiceMock.Object, _userContextServiceMock.Object);
         }
 
-        private void SeedCompanyWithDrivers()
+        [Theory]
+        [InlineData("Krawczyk", 1)]
+        [InlineData("KON", 1)]
+        [InlineData("@wp.pl", 4)]
+        [InlineData("", 4)]
+        [InlineData(null, 4)]
+        public void GetAll_WithDifferentSearchPhrases_ReturnsExpectedCount(string searchPhrase, int expectedCount)
         {
-            var company = new Company 
-            { 
-                Id = 1,
-                Drivers = new List<Driver> 
-                { 
-                    new Driver 
-                    {
-                        Id = 9,
-                        FirstName = "Krzysztof",
-                        LastName = "Krawczyk",
-                        PersonalNumber = "11122233344",
-                        DateOfBirth = new DateTime(1980, 5, 15),
-                        LicenseDriving = "C+E",
-                        PhoneNumber = 987654321,
-                        ContactEmail = "krzyszdzis@wp.pl",
-                        CompanyId = 1
-                    },
+            //Arrange
 
-                    new Driver
-                    {
-                        Id = 10,
-                        FirstName = "Damian",
-                        LastName = "Konrad",
-                        PersonalNumber = "11155555544",
-                        DateOfBirth = new DateTime(1990, 2, 15),
-                        LicenseDriving = "C",
-                        PhoneNumber = 111654321,
-                        ContactEmail = "damian@wp.pl",
-                        CompanyId = 1
-                    },
+            DriverSeeder.SeedCompanyWithDrivers(_dbContext);
 
-                    new Driver
-                    {
-                        Id = 11,
-                        FirstName = "Radosław",
-                        LastName = "Polski",
-                        PersonalNumber = "22255555544",
-                        DateOfBirth = new DateTime(1999, 3, 15),
-                        LicenseDriving = "C+E",
-                        PhoneNumber = 887654321,
-                        ContactEmail = "rado@wp.pl",
-                        CompanyId = 1
-                    },
-
-                    new Driver
-                    {
-                        Id = 12,
-                        FirstName = "Julia",
-                        LastName = "Dziarska",
-                        PersonalNumber = "22257546544",
-                        DateOfBirth = new DateTime(2001, 9, 10),
-                        LicenseDriving = "C+E",
-                        PhoneNumber = 333654321,
-                        ContactEmail = "julianna@wp.pl",
-                        CompanyId = 1
-                    }
-                }
+            var query = new DriverQuery
+            {
+                SearchPhrase = searchPhrase,
+                PageNumber = 1,
+                PageSize = 10
             };
 
-            _dbContext.Companies.Add(company);
-            _dbContext.SaveChanges();
+            //Act
+
+            var result = _sut.GetAll(1, query);
+
+            //Assert
+
+            result.Items.Count.Should().Be(expectedCount);
+            result.TotalItemsCount.Should().Be(expectedCount);
+        }
+
+        [Theory]
+        [InlineData(nameof(Driver.FirstName), SortDirection.ASC, "Damian")]
+        [InlineData(nameof(Driver.FirstName), SortDirection.DESC, "Radosław")]
+        [InlineData(nameof(Driver.LastName), SortDirection.ASC, "Dziarska")]
+        [InlineData(nameof(Driver.LastName), SortDirection.DESC, "Polski")]
+        [InlineData(nameof(Driver.LicenseDriving), SortDirection.ASC, "C")]
+        [InlineData(nameof(Driver.LicenseDriving), SortDirection.DESC, "C+E")]
+        [InlineData(nameof(Driver.ContactEmail), SortDirection.ASC, "damian@wp.pl")]
+        [InlineData(nameof(Driver.ContactEmail), SortDirection.DESC, "rado@wp.pl")]
+        public void GetAll_WithSorting_ReturnsSortedResults(string sortBy, SortDirection direction, string expectedFirstValue)
+        {
+            //Arrange
+
+            DriverSeeder.SeedCompanyWithDrivers(_dbContext);
+
+            var query = new DriverQuery
+            {
+                SortBy = sortBy,
+                SortDirection = direction,
+                PageNumber = 1,
+                PageSize = 10
+            };
+
+            //Act
+
+            var result = _sut.GetAll(1, query);
+
+            //Assert
+
+            var firstItem = result.Items.First();
+
+            var value = firstItem
+                    .GetType()
+                    .GetProperty(sortBy)!
+                    .GetValue(firstItem)?
+                    .ToString();
+
+            value.Should().Be(expectedFirstValue);
+        }
+
+        [Theory]
+        [InlineData(1, 1, "Damian")]
+        [InlineData(2, 1, "Julia")]
+        [InlineData(3, 1, "Krzysztof")]
+        [InlineData(4, 1, "Radosław")]
+        public void GetAll_WithPagination_ReturnsCorrectPage(int pageNumber, int pageSize, string expectedFirstName)
+        {
+            //Arrange
+
+            DriverSeeder.SeedCompanyWithDrivers(_dbContext);
+
+            var query = new DriverQuery
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                SortBy = nameof(Driver.FirstName),
+                SortDirection = SortDirection.ASC
+            };
+
+            //Act
+
+            var result = _sut.GetAll(1, query);
+
+            //Assert
+
+            result.Items.Should().HaveCount(1);
+            result.Items.First().FirstName.Should().Be(expectedFirstName);
+            result.TotalItemsCount.Should().Be(4);
         }
 
         [Fact]
@@ -121,15 +157,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var company = new Company { Id = 1 };
-
-            var driver = new Driver { Id = 10, CompanyId = 1 };
-
-            company.Drivers = new List<Driver> { driver };
-
-            _dbContext.Companies.Add(company);
-            _dbContext.Drivers.Add(driver);
-            _dbContext.SaveChanges();
+            DriverSeeder.SeedCompanyWithDrivers(_dbContext);
 
             //Act
 
@@ -200,21 +228,9 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var company = new Company { Id = 1 };
-            _dbContext.Companies.Add(company);
-            _dbContext.SaveChanges();
+            DriverSeeder.SeedCompanyWithDrivers(_dbContext);
 
-            var dto = new CreateDriverDto
-            {
-                FirstName = "Jan",
-                LastName = "Nowak",
-                PersonalNumber = "12345678901",
-                DateOfBirth = new DateTime(1990, 1, 1),
-                LicenseDriving = "C+E",
-                PhoneNumber = 123456789,
-                ContactEmail = "mikolajki@wp.pl",
-                CompanyId = 1
-            };
+            var dto = new CreateDriverBuilder().Build();
 
             //Act
 
@@ -226,15 +242,14 @@ namespace LogiTrack.Tests.Services
 
             var driver = _dbContext.Drivers.First();
 
-            driver.FirstName.Should().Be("Jan");
-            driver.LastName.Should().Be("Nowak");
-            driver.PersonalNumber.Should().Be("12345678901");
-            driver.DateOfBirth.Should().Be(new DateTime(1990, 1, 1));
+            driver.FirstName.Should().Be("Krzysztof");
+            driver.LastName.Should().Be("Krawczyk");
+            driver.PersonalNumber.Should().Be("11122233344");
+            driver.DateOfBirth.Should().Be(new DateTime(1980, 5, 15));
             driver.LicenseDriving.Should().Be("C+E");
-            driver.PhoneNumber.Should().Be(123456789);
-            driver.ContactEmail.Should().Be("mikolajki@wp.pl");
+            driver.PhoneNumber.Should().Be(987654321);
+            driver.ContactEmail.Should().Be("krzyszdzis@wp.pl");
             driver.CompanyId.Should().Be(1);
-            driver.CreatedById.Should().Be(1);
         }
 
         [Fact]
@@ -242,17 +257,7 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var dto = new CreateDriverDto
-            {
-                FirstName = "Jan",
-                LastName = "Nowak",
-                PersonalNumber = "12345678901",
-                DateOfBirth = new DateTime(1990, 1, 1),
-                LicenseDriving = "C+E",
-                PhoneNumber = 123456789,
-                ContactEmail = "mikolajki@wp.pl",
-                CompanyId = 1
-            };
+            var dto = new CreateDriverBuilder().Build();
 
             //Act
 
@@ -274,17 +279,7 @@ namespace LogiTrack.Tests.Services
 
             _userContextServiceMock.Setup(x => x.GetUserId).Returns(999);
 
-            var dto = new CreateDriverDto
-            {
-                FirstName = "Jan",
-                LastName = "Nowak",
-                PersonalNumber = "12345678901",
-                DateOfBirth = new DateTime(1990, 1, 1),
-                LicenseDriving = "C+E",
-                PhoneNumber = 123456789,
-                ContactEmail = "mikolajki@wp.pl",
-                CompanyId = 1
-            };
+            var dto = new CreateDriverBuilder().Build();
 
             //Act
 
@@ -301,58 +296,27 @@ namespace LogiTrack.Tests.Services
         {
             //Arrange
 
-            var company = new Company { Id = 1 };
+            DriverSeeder.SeedCompanyWithDrivers(_dbContext);
 
-            var driver = new Driver
-            {
-                Id = 10,
-                CompanyId = 1,
-                FirstName = "Jan",
-                LastName = "Nowak",
-                PersonalNumber = "12345678901",
-                DateOfBirth = new DateTime(1990, 1, 1),
-                LicenseDriving = "C+E",
-                PhoneNumber = 123456789,
-                ContactEmail = "mikolajki@wp.pl"
-            };
+            _authorizationServiceMock.SetupSuccess();
 
-            _dbContext.Companies.Add(company);
-            _dbContext.Drivers.Add(driver);
-            _dbContext.SaveChanges();
-
-            _authorizationServiceMock
-                .Setup(x => x.AuthorizeAsync(
-                    It.IsAny<ClaimsPrincipal>(),
-                    It.IsAny<object>(),
-                    It.IsAny<IEnumerable<IAuthorizationRequirement>>()))
-                .ReturnsAsync(AuthorizationResult.Success());
-
-            var dto = new UpdateDriverDto
-            {
-                FirstName = "Janek",
-                LastName = "Nowak-edit",
-                PersonalNumber = "145865421",
-                DateOfBirth = new DateTime(1990, 12, 12),
-                LicenseDriving = "C",
-                PhoneNumber = 111111111,
-                ContactEmail = "mikolajki-edit@wp.pl"
-            };
+            var dto = new UpdateDriverBuilder().Build();
 
             //Act
 
-            _sut.UpdateDriver(1, 10, dto);
+            _sut.UpdateDriver(1, 9, dto);
 
             //Assert
 
             var updateDriver = _dbContext.Drivers.First();
 
-            updateDriver.FirstName.Should().Be("Janek");
-            updateDriver.LastName.Should().Be("Nowak-edit");
-            updateDriver.PersonalNumber.Should().Be("145865421");
-            updateDriver.DateOfBirth.Should().Be(new DateTime(1990, 12, 12));
+            updateDriver.FirstName.Should().Be("Krzyś");
+            updateDriver.LastName.Should().Be("Matijas");
+            updateDriver.PersonalNumber.Should().Be("11122231111");
+            updateDriver.DateOfBirth.Should().Be(new DateTime(1980, 5, 21));
             updateDriver.LicenseDriving.Should().Be("C");
-            updateDriver.PhoneNumber.Should().Be(111111111);
-            updateDriver.ContactEmail.Should().Be("mikolajki-edit@wp.pl");
+            updateDriver.PhoneNumber.Should().Be(987654111);
+            updateDriver.ContactEmail.Should().Be("krzysztof@wp.pl");
         }
 
         [Fact]
@@ -364,10 +328,7 @@ namespace LogiTrack.Tests.Services
             _dbContext.Companies.Add(company);
             _dbContext.SaveChanges();
 
-            var dto = new UpdateDriverDto
-            {
-                FirstName = "Jan"
-            };
+            var dto = new UpdateDriverBuilder().Build();
 
             //Act
 
@@ -402,17 +363,9 @@ namespace LogiTrack.Tests.Services
             _dbContext.Drivers.Add(driver);
             _dbContext.SaveChanges();
 
-            _authorizationServiceMock
-                .Setup(x => x.AuthorizeAsync(
-                    It.IsAny<ClaimsPrincipal>(),
-                    It.IsAny<object>(),
-                    It.IsAny<IEnumerable<IAuthorizationRequirement>>()))
-                .ReturnsAsync(AuthorizationResult.Failed());
+            _authorizationServiceMock.SetupFail();
 
-            var dto = new UpdateDriverDto
-            {
-                FirstName = "Jan"
-            };
+            var dto = new UpdateDriverBuilder().Build();
 
             //Act
 
@@ -435,12 +388,7 @@ namespace LogiTrack.Tests.Services
             _dbContext.Drivers.Add(driver);
             _dbContext.SaveChanges();
 
-            _authorizationServiceMock
-                .Setup(x => x.AuthorizeAsync(
-                    It.IsAny<ClaimsPrincipal>(),
-                    It.IsAny<object>(),
-                    It.IsAny<IEnumerable<IAuthorizationRequirement>>()))
-                .ReturnsAsync(AuthorizationResult.Success());
+            _authorizationServiceMock.SetupSuccess();
 
             //Act
 
@@ -492,12 +440,7 @@ namespace LogiTrack.Tests.Services
             _dbContext.Drivers.Add(driver);
             _dbContext.SaveChanges();
 
-            _authorizationServiceMock
-                .Setup(x => x.AuthorizeAsync(
-                    It.IsAny<ClaimsPrincipal>(),
-                    It.IsAny<object>(),
-                    It.IsAny<IEnumerable<IAuthorizationRequirement>>()))
-                .ReturnsAsync(AuthorizationResult.Failed());
+            _authorizationServiceMock.SetupFail();
 
             //Act
 
@@ -554,105 +497,6 @@ namespace LogiTrack.Tests.Services
             //Assert
 
             action.Should().Throw<NotFoundException>().WithMessage("Company not found");
-        }
-
-        [Theory]
-        [InlineData("Krawczyk", 1)]
-        [InlineData("KON", 1)]
-        [InlineData("@wp.pl", 4)]
-        [InlineData("", 4)]
-        [InlineData(null, 4)]
-        public void GetAll_WithDifferentSearchPhrases_ReturnsExpectedCount(string searchPhrase, int expectedCount)
-        {
-            //Arrange
-
-            SeedCompanyWithDrivers();
-
-            var query = new DriverQuery
-            {
-                SearchPhrase = searchPhrase,
-                PageNumber = 1,
-                PageSize = 10
-            };
-
-            //Act
-
-            var result = _sut.GetAll(1, query);
-
-            //Assert
-
-            result.Items.Count.Should().Be(expectedCount);
-            result.TotalItemsCount.Should().Be(expectedCount);
-        }
-
-        [Theory]
-        [InlineData(nameof(Driver.FirstName), SortDirection.ASC, "Damian")]
-        [InlineData(nameof(Driver.FirstName), SortDirection.DESC, "Radosław")]
-        [InlineData(nameof(Driver.LastName), SortDirection.ASC, "Dziarska")]
-        [InlineData(nameof(Driver.LastName), SortDirection.DESC, "Polski")]
-        [InlineData(nameof(Driver.LicenseDriving), SortDirection.ASC, "C")]
-        [InlineData(nameof(Driver.LicenseDriving), SortDirection.DESC, "C+E")]
-        [InlineData(nameof(Driver.ContactEmail), SortDirection.ASC, "damian@wp.pl")]
-        [InlineData(nameof(Driver.ContactEmail), SortDirection.DESC, "rado@wp.pl")]
-        public void GetAll_WithSorting_ReturnsSortedResults(string sortBy, SortDirection direction, string expectedFirstValue)
-        {
-            //Arrange
-
-            SeedCompanyWithDrivers();
-
-            var query = new DriverQuery
-            {
-                SortBy = sortBy,
-                SortDirection = direction,
-                PageNumber = 1,
-                PageSize = 10
-            };
-
-            //Act
-
-            var result = _sut.GetAll(1, query);
-
-            //Assert
-
-            var firstItem = result.Items.First();
-
-            var value = firstItem
-                    .GetType()
-                    .GetProperty(sortBy)!
-                    .GetValue(firstItem)?
-                    .ToString();
-
-            value.Should().Be(expectedFirstValue);
-        }
-
-        [Theory]
-        [InlineData(1, 1, "Damian")]
-        [InlineData(2, 1, "Julia")]
-        [InlineData(3, 1, "Krzysztof")]
-        [InlineData(4, 1, "Radosław")]
-        public void GetAll_WithPagination_ReturnsCorrectPage(int pageNumber, int pageSize, string expectedFirstName) 
-        {
-            //Arrange
-
-            SeedCompanyWithDrivers();
-
-            var query = new DriverQuery
-            {
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                SortBy = nameof(Driver.FirstName),
-                SortDirection = SortDirection.ASC
-            };
-
-            //Act
-
-            var result = _sut.GetAll(1, query);
-
-            //Assert
-
-            result.Items.Should().HaveCount(1);
-            result.Items.First().FirstName.Should().Be(expectedFirstName);
-            result.TotalItemsCount.Should().Be(4);
         }
     }
 }
